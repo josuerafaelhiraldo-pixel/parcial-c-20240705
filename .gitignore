@@ -1,0 +1,23 @@
+# Ejecutables y archivos temporales de compilacion
+build/
+*.exe
+*.o
+*.obj
+a.out
+
+# Salidas de compilacion de STM32CubeIDE
+Debug/
+Release/
+*.elf
+*.map
+*.su
+*.d
+*.cyclo
+
+# Archivos del sistema y configuracion privada
+.DS_Store
+Thumbs.db
+.env
+
+# IMPORTANTE: NO ignorar *.out
+# Los archivos pruebas/caso_XX.out son resultados esperados y deben subirse.
