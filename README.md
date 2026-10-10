@@ -41,6 +41,9 @@ Primer Parcial 1L C3-2026 · Code Challenge · Aplicación bare-metal en C, sin 
 
 Sin conflictos de pin mux entre estas funciones.
 
+Polaridades medidas en la placa durante el Hito 1: LD2 es activo en alto (PA5 en alto = encendido)
+y B1 es activo en bajo (reposo = 1, pulsado = 0). Detalle en `pruebas/hito1_resultados.md`.
+
 ## Reloj efectivo y cálculos
 
 Configuración de reloj (captura en `evidencias/`): HSI 16 MHz → PLL → SYSCLK = HCLK = 84 MHz.
@@ -88,15 +91,22 @@ stateDiagram-v2
 | Carpeta | Contenido |
 |---|---|
 | `Parcial_20240705/` | Proyecto de STM32CubeIDE (`Src/`, `Inc/`, `Drivers/`, `.ioc`) |
-| `analisis/` | Documentos de diseño |
-| `pruebas/` | Registros de las pruebas de aceptación |
-| `evidencias/` | Capturas, mediciones y enlace al video |
+| `analisis/` | Documentos de diseño (`uart_buffers.md`: tiempos y límites de los buffers UART) |
+| `pruebas/` | Resultados de pruebas (`hito1_resultados.md`) y pruebas de lógica en PC (`host/`) |
+| `evidencias/` | Capturas, fotos, mediciones y enlace al video (`hito1/`) |
 
 ## Código del SDK y aporte propio
 
 - Generado por CubeMX y HAL: `Drivers/`, inicialización de periféricos (`gpio.c`, `tim.c`,
   `usart.c`), `main.c` base y manejadores de interrupción generados.
-- Aporte propio: PENDIENTE, aún no hay código propio.
+- Código de la aplicación (no generado por CubeMX ni incluido en el HAL), en `Inc/` y `Src/`:
+  - `ringbuf.c/.h`: buffer circular con un productor y un consumidor.
+  - `console.c/.h`: consola UART no bloqueante (RX por interrupción, cola TX, contadores de errores).
+  - `app_config.h`: pines y tamaños de buffer.
+  - `app.c/.h`: arranque y pruebas temporales del Hito 1 (se reemplazan en los hitos siguientes).
+- Cambios en archivos generados: solo tres líneas en los bloques `USER CODE` de `main.c`
+  (`#include "app.h"`, `App_Init();` y `App_Loop();`).
+- `pruebas/host/`: pruebas de lógica que se compilan en un PC con funciones simuladas del HAL.
 
 ## Pruebas de aceptación
 
@@ -116,21 +126,42 @@ stateDiagram-v2
 | Desbordamiento de RX provocado | Error contabilizado y recuperación en la siguiente línea | Pendiente |
 | Tiempo cerca de UINT32_MAX | La temporización continúa al desbordar | Pendiente |
 
+Resultados de las pruebas previas de GPIO y consola (Hito 1): `pruebas/hito1_resultados.md`.
+
 Verificación de frecuencia y duty del PWM: PENDIENTE: se completará con el método usado y los resultados.
 
 ## Hitos y commits
 
-| Hito | Estado |
+| Hito | Estado | Commits y evidencia |
+|---|---|---|
+| 1. GPIO y consola | Hecho (2026-10-09) | `Agrego buffer circular y consola UART2 no bloqueante`; `Hito 1: pruebo LD2, lectura de B1 y consola por USART2`; `Hito 1: agrego evidencias, analisis de buffers y resultados`. Evidencias en `evidencias/hito1/` |
+| 2. Interrupciones y antirrebote | Pendiente | — |
+| 3. TIMER y PWM | Pendiente | — |
+| 4. Integración y comandos | Pendiente | — |
+| 5. Pruebas y correcciones | Pendiente | — |
+
+### Hito 1: GPIO y consola
+
+- Compilación: 0 errores y 0 advertencias (text 21 232 B, data 92 B, bss 3 980 B).
+- Consola por USART2 a 115200 8N1: banner, teclas de prueba y contadores de errores sin fallos.
+- LD2: se enciende con la tecla `1` y se apaga con `0`; activo en alto.
+- B1: nivel 1 en reposo y 0 al pulsar; activo en bajo. En este hito se lee por sondeo solo para medir la polaridad.
+- Una ráfaga de más de 128 caracteres pasó sin pérdidas: `overflow_buffer=0`, `mensajes_descartados=0`, `ORE/FE/NE/PE=0`.
+
+| LD2 encendido (tecla `1`) | LD2 apagado (tecla `0`) |
 |---|---|
-| 1. GPIO y consola | Pendiente |
-| 2. Interrupciones y antirrebote | Pendiente |
-| 3. TIMER y PWM | Pendiente |
-| 4. Integración y comandos | Pendiente |
-| 5. Pruebas y correcciones | Pendiente |
+| ![LD2 encendido](evidencias/hito1/04_ld2_encendido.jpg) | ![LD2 apagado](evidencias/hito1/05_ld2_apagado.jpg) |
+
+![Consola en Tera Term](evidencias/hito1/03_consola_tera_term.png)
+
+Más evidencia: `evidencias/hito1/01_compilacion_0_errores.png` y `evidencias/hito1/02_carga_en_placa.png`.
 
 ## Estado actual
 
 - Hecho: proyecto base generado con CubeMX (TIM3 PWM, TIM6 tick, USART2, EXTI13 y LD2) y
-  compilado sin errores ni advertencias.
-- Pendiente: toda la lógica de la aplicación, las pruebas de aceptación, las evidencias y el video.
-- Errores conocidos: ninguno registrado todavía.
+  Hito 1 (GPIO y consola) probado en la placa.
+- Pendiente: interrupción del botón con antirrebote, tick de 1 ms, PWM, máquina de estados,
+  parser de comandos, pruebas de aceptación, evidencias del PWM y el video.
+- Limitaciones conocidas: B1 se lee por sondeo y las teclas `1`, `0`, `t`, `b`, `s`, `h` son temporales;
+  se reemplazan en los Hitos 2 y 4.
+- Errores conocidos: ninguno registrado en el Hito 1.
