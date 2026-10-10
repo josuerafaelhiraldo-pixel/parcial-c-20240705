@@ -91,9 +91,9 @@ stateDiagram-v2
 | Carpeta | Contenido |
 |---|---|
 | `Parcial_20240705/` | Proyecto de STM32CubeIDE (`Src/`, `Inc/`, `Drivers/`, `.ioc`) |
-| `analisis/` | Documentos de diseño (`uart_buffers.md`: tiempos y límites de los buffers UART) |
-| `pruebas/` | Resultados de pruebas (`hito1_resultados.md`) y pruebas de lógica en PC (`host/`) |
-| `evidencias/` | Capturas, fotos, mediciones y enlace al video (`hito1/`) |
+| `analisis/` | Documentos de diseño (`uart_buffers.md`: buffers UART; `tick_y_antirrebote.md`: tick, EXTI y antirrebote) |
+| `pruebas/` | Resultados de pruebas (`hito1_resultados.md`, `hito2_resultados.md`) y pruebas de lógica en PC (`host/`) |
+| `evidencias/` | Capturas, fotos, mediciones y enlace al video (`hito1/`, `hito2/`) |
 
 ## Código del SDK y aporte propio
 
@@ -102,8 +102,10 @@ stateDiagram-v2
 - Código de la aplicación (no generado por CubeMX ni incluido en el HAL), en `Inc/` y `Src/`:
   - `ringbuf.c/.h`: buffer circular con un productor y un consumidor.
   - `console.c/.h`: consola UART no bloqueante (RX por interrupción, cola TX, contadores de errores).
-  - `app_config.h`: pines y tamaños de buffer.
-  - `app.c/.h`: arranque y pruebas temporales del Hito 1 (se reemplazan en los hitos siguientes).
+  - `tick.c/.h`: base de tiempo de 1 ms con la interrupción de TIM6 (SysTick queda solo para el HAL).
+  - `button.c/.h`: pulsador B1 con EXTI en ambos flancos, antirrebote de 30 ms y pulsación corta/larga.
+  - `app_config.h`: pines, polaridades, tiempos del pulsador y tamaños de buffer.
+  - `app.c/.h`: arranque y pruebas temporales de los Hitos 1 y 2 (se reemplazan en los hitos siguientes).
 - Cambios en archivos generados: solo tres líneas en los bloques `USER CODE` de `main.c`
   (`#include "app.h"`, `App_Init();` y `App_Loop();`).
 - `pruebas/host/`: pruebas de lógica que se compilan en un PC con funciones simuladas del HAL.
@@ -127,6 +129,9 @@ stateDiagram-v2
 | Tiempo cerca de UINT32_MAX | La temporización continúa al desbordar | Pendiente |
 
 Resultados de las pruebas previas de GPIO y consola (Hito 1): `pruebas/hito1_resultados.md`.
+Resultados de tick, interrupción del botón y antirrebote (Hito 2): `pruebas/hito2_resultados.md`.
+Las pruebas de aceptación de «20 pulsaciones cortas», «Mantener el botón 3 s» y «Tiempo cerca de UINT32_MAX»
+se hicieron en el Hito 2 con la aplicación de prueba y se repetirán con la aplicación integrada (Hito 5).
 
 Verificación de frecuencia y duty del PWM: PENDIENTE: se completará con el método usado y los resultados.
 
@@ -135,7 +140,7 @@ Verificación de frecuencia y duty del PWM: PENDIENTE: se completará con el mé
 | Hito | Estado | Commits y evidencia |
 |---|---|---|
 | 1. GPIO y consola | Hecho (2026-10-09) | `Agrego buffer circular y consola UART2 no bloqueante`; `Hito 1: pruebo LD2, lectura de B1 y consola por USART2`; `Hito 1: agrego evidencias, analisis de buffers y resultados`. Evidencias en `evidencias/hito1/` |
-| 2. Interrupciones y antirrebote | Pendiente | — |
+| 2. Interrupciones y antirrebote | Hecho (2026-10-10) | `Agrego tick de 1 ms con interrupcion de TIM6`; `Agrego boton B1 con EXTI en ambos flancos y antirrebote de 30 ms`; `Hito 2: integro tick y boton en la app, con pruebas en PC y analisis`; commit de evidencias del Hito 2. Evidencias en `evidencias/hito2/` |
 | 3. TIMER y PWM | Pendiente | — |
 | 4. Integración y comandos | Pendiente | — |
 | 5. Pruebas y correcciones | Pendiente | — |
@@ -156,12 +161,27 @@ Verificación de frecuencia y duty del PWM: PENDIENTE: se completará con el mé
 
 Más evidencia: `evidencias/hito1/01_compilacion_0_errores.png` y `evidencias/hito1/02_carga_en_placa.png`.
 
+### Hito 2: interrupciones, tick y antirrebote
+
+- Tick de 1 ms con la interrupción de TIM6 (PSC 83, ARR 999). La comparación con SysTick dio una diferencia acumulada de 1 ms en unos 9,5 s.
+- B1 por interrupción EXTI13 en ambos flancos. La ISR solo incrementa un contador de flancos; el antirrebote de 30 ms, la clasificación y los contadores se hacen en `main`, una vez por tick.
+- Pulsación corta (de 30 ms a menos de 1500 ms, al soltar) y larga (una sola vez al llegar a 1500 ms, sin corta al soltar). Las duraciones se miden sobre el estado ya validado.
+- 20 pulsaciones cortas dieron 20 eventos y 40 flancos (`flancos_isr`); mantener 10,7 s dio una sola larga; arrancar con B1 pulsado no genera eventos.
+- Todas las diferencias de tiempo usan `(uint32_t)(ahora - antes)`. Con la tecla de prueba `w` se inyectó el contador a 2048 ms de UINT32_MAX y una pulsación larga cruzó el desbordamiento (`t=628 ms` tras la vuelta).
+- Limitación: el botón casi no rebotó en la placa (2 flancos por pulsación); el filtrado de rebotes se verificó con rebotes simulados en las pruebas de PC.
+
+![20 pulsaciones cortas](evidencias/hito2/03_20_cortas_y_estadisticas.png)
+
+![Larga que cruza el desbordamiento](evidencias/hito2/05_desbordamiento_uint32.png)
+
+Más evidencia en `evidencias/hito2/` y detalle en `pruebas/hito2_resultados.md` y `analisis/tick_y_antirrebote.md`.
+
 ## Estado actual
 
-- Hecho: proyecto base generado con CubeMX (TIM3 PWM, TIM6 tick, USART2, EXTI13 y LD2) y
-  Hito 1 (GPIO y consola) probado en la placa.
-- Pendiente: interrupción del botón con antirrebote, tick de 1 ms, PWM, máquina de estados,
-  parser de comandos, pruebas de aceptación, evidencias del PWM y el video.
-- Limitaciones conocidas: B1 se lee por sondeo y las teclas `1`, `0`, `t`, `b`, `s`, `h` son temporales;
-  se reemplazan en los Hitos 2 y 4.
-- Errores conocidos: ninguno registrado en el Hito 1.
+- Hecho: proyecto base generado con CubeMX (TIM3 PWM, TIM6 tick, USART2, EXTI13 y LD2),
+  Hito 1 (GPIO y consola) y Hito 2 (tick de 1 ms, EXTI de B1 y antirrebote) probados en la placa.
+- Pendiente: PWM con TIM3, máquina de estados, parser de comandos, pruebas de aceptación,
+  evidencias del PWM y el video.
+- Limitaciones conocidas: las teclas de prueba (`1`, `0`, `t`, `b`, `s`, `h`, `m`, `w`) y las acciones de B1
+  (corta = alternar LD2, larga = apagar LD2) son temporales; se reemplazan en el Hito 4.
+- Errores conocidos: ninguno registrado en los Hitos 1 y 2.
