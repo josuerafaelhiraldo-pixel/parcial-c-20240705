@@ -79,3 +79,34 @@ void HAL_GPIO_WritePin(GPIO_TypeDef *g, uint16_t pin, GPIO_PinState s) { pin_sta
 GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef *g, uint16_t pin) { return pin_state[g->id][pin_index(pin)]; }
 void HAL_GPIO_TogglePin(GPIO_TypeDef *g, uint16_t pin)
 { int i = pin_index(pin); pin_state[g->id][i] = pin_state[g->id][i] ? GPIO_PIN_RESET : GPIO_PIN_SET; }
+
+/* ---- TIM6 / SysTick ---- */
+TIM_TypeDef sim_TIM3 = { 3 }, sim_TIM6 = { 6 };
+TIM_HandleTypeDef htim3 = { &sim_TIM3 }, htim6 = { &sim_TIM6 };
+int sim_tim_flag_clears, sim_tim_start_calls;
+uint32_t sim_systick_ms;
+
+HAL_StatusTypeDef HAL_TIM_Base_Start_IT(TIM_HandleTypeDef *h)
+{
+    if (h->Instance != TIM6) return HAL_ERROR;
+    sim_tim_start_calls++;
+    return HAL_OK;
+}
+
+uint32_t HAL_GetTick(void) { return sim_systick_ms; }
+
+void sim_tick(uint32_t n)
+{
+    while (n--) {
+        sim_systick_ms++;
+        HAL_TIM_PeriodElapsedCallback(&htim6);
+    }
+}
+
+/* Como en el HAL real, los callbacks son debiles: si un modulo no los define,
+ * no pasa nada. Asi cada prueba solo enlaza los modulos que necesita. */
+__attribute__((weak)) void HAL_UART_TxCpltCallback(UART_HandleTypeDef *h) { (void)h; }
+__attribute__((weak)) void HAL_UART_RxCpltCallback(UART_HandleTypeDef *h) { (void)h; }
+__attribute__((weak)) void HAL_UART_ErrorCallback(UART_HandleTypeDef *h) { (void)h; }
+__attribute__((weak)) void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *h) { (void)h; }
+__attribute__((weak)) void HAL_GPIO_EXTI_Callback(uint16_t p) { (void)p; }

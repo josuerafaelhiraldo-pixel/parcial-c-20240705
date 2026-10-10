@@ -46,4 +46,18 @@ extern GPIO_TypeDef sim_GPIOA, sim_GPIOC;
 void          HAL_GPIO_WritePin(GPIO_TypeDef *g, uint16_t pin, GPIO_PinState s);
 GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef *g, uint16_t pin);
 void          HAL_GPIO_TogglePin(GPIO_TypeDef *g, uint16_t pin);
+
+/* TIM (solo lo que usa tick.c) */
+typedef struct { int id; } TIM_TypeDef;
+typedef struct { TIM_TypeDef *Instance; } TIM_HandleTypeDef;
+extern TIM_TypeDef sim_TIM3, sim_TIM6;
+#define TIM3 (&sim_TIM3)
+#define TIM6 (&sim_TIM6)
+#define TIM_FLAG_UPDATE 0x01U
+extern int sim_tim_flag_clears;
+#define __HAL_TIM_CLEAR_FLAG(h, f) ((void)(h), (void)(f), sim_tim_flag_clears++)
+HAL_StatusTypeDef HAL_TIM_Base_Start_IT(TIM_HandleTypeDef *h);
+void     HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *h);
+uint32_t HAL_GetTick(void);
+void     HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 #endif
