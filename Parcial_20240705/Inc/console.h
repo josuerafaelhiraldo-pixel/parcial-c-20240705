@@ -33,4 +33,11 @@ bool Console_Printf(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 
 void Console_GetStats(ConsoleStats *out);
 
+/* Espacio libre en la cola TX (para saber si un mensaje cabe entero sin intentar escribirlo). */
+uint16_t Console_TxFree(void);
+
+/* Suma de todo lo que puede haber perdido o danado bytes de RX: buffer lleno + errores ORE/FE/NE/PE.
+ * Solo crece. El interprete lo compara con el valor anterior para descartar la orden afectada. */
+uint32_t Console_RxFaultCount(void);
+
 #endif /* CONSOLE_H */

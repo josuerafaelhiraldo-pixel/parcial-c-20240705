@@ -1,4 +1,5 @@
 /* Pruebas en PC de la consola (console.c) usando el simulador de HAL. */
+#include "app_config.h"
 #include "console.h"
 #include "hal_sim.h"
 #include "usart.h"
@@ -47,14 +48,17 @@ int main(void)
 
     /* --- TX: cola llena -> el mensaje se descarta ENTERO y se cuenta --- */
     {
-        char big[300]; memset(big, 'x', sizeof big - 1); big[sizeof big - 1] = 0;
+        char big[600]; memset(big, 'x', sizeof big - 1); big[sizeof big - 1] = 0;
         Console_GetStats(&st); uint32_t d0 = st.txDropped;
-        CHECK(Console_Write(big));                      /* 299 bytes caben (cola de 512) */
-        CHECK(!Console_Write(big));                     /* otros 299 ya no caben */
+        CHECK(Console_TxFree() == APP_TX_BUF_SIZE - 1U);    /* cola vacia: capacidad util = tamano - 1 */
+        CHECK(Console_Write(big));                      /* 599 bytes caben (cola de 1024) */
+        CHECK(Console_TxFree() < APP_TX_BUF_SIZE - 1U - 500U);   /* el espacio libre bajo (parte ya va en vuelo) */
+        CHECK(!Console_Write(big));                     /* otros 599 ya no caben */
         Console_GetStats(&st);
         CHECK(st.txDropped == d0 + 1);
         sim_tx_drain();
-        CHECK(sim_tx_out_len == 299);                   /* solo salio el primero, completo */
+        CHECK(sim_tx_out_len == 599);                   /* solo salio el primero, completo */
+        CHECK(Console_TxFree() == APP_TX_BUF_SIZE - 1U);
         sim_tx_out_len = 0;
     }
 
@@ -84,6 +88,25 @@ int main(void)
     Console_GetStats(&st);
     CHECK(st.uartFraming == 1 && st.uartNoise == 1 && st.uartParity == 1);
 
+    /* --- Console_RxFaultCount: suma de bytes perdidos por buffer lleno y de errores de hardware --- */
+    Console_GetStats(&st);
+    CHECK(Console_RxFaultCount() == st.rxRingOverflow + st.uartOverrun + st.uartFraming + st.uartNoise + st.uartParity);
+    {
+        uint32_t f0 = Console_RxFaultCount();
+        sim_rx_error(HAL_UART_ERROR_FE);
+        CHECK(Console_RxFaultCount() == f0 + 1);
+        sim_rx_error(HAL_UART_ERROR_ORE);
+        CHECK(Console_RxFaultCount() == f0 + 2);
+        sim_rx_error(HAL_UART_ERROR_NE | HAL_UART_ERROR_PE);
+        CHECK(Console_RxFaultCount() == f0 + 4);
+        for (int i = 0; i < 300; i++) sim_rx_byte((uint8_t)i);        /* buffer lleno: 45 bytes perdidos */
+        CHECK(Console_RxFaultCount() == f0 + 4 + 45);
+        while (Console_ReadByte(&b)) { }
+        uint32_t f1 = Console_RxFaultCount();
+        sim_rx_byte('A'); while (Console_ReadByte(&b)) { }
+        CHECK(Console_RxFaultCount() == f1);                          /* sin fallos, no cambia */
+    }
+
     /* --- recuperacion desde Console_Service si la RX quedo detenida --- */
     huart2.RxState = HAL_UART_STATE_READY;              /* simula RX parada */
     arms = sim_rx_arm_calls;
@@ -101,7 +124,7 @@ int main(void)
         char longfmt[400]; memset(longfmt, 'y', sizeof longfmt - 1); longfmt[sizeof longfmt - 1] = 0;
         CHECK(Console_Printf("%s", longfmt));
         sim_tx_drain();
-        CHECK(sim_tx_out_len == 127);                   /* APP_PRINTF_MAX - 1 */
+        CHECK(sim_tx_out_len == APP_PRINTF_MAX - 1U);   /* se trunca a APP_PRINTF_MAX - 1 */
     }
 
     printf(fails ? "CONSOLE: %d FALLOS\n" : "CONSOLE: todas las pruebas OK\n", fails);

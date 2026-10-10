@@ -152,6 +152,18 @@ void Console_GetStats(ConsoleStats *out)
     out->txDropped      = s_txDropped;
 }
 
+uint16_t Console_TxFree(void)
+{
+    return RingBuf_Free(&s_tx);
+}
+
+uint32_t Console_RxFaultCount(void)
+{
+    /* Cada contador es de 32 bits y lo escribe un solo contexto (la ISR): cada lectura es atomica.
+     * La suma solo crece, asi que basta con detectar que cambio. */
+    return s_rxRingOverflow + s_ore + s_fe + s_ne + s_pe;
+}
+
 /* ================= Callbacks del HAL (contexto de ISR) ================= */
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)

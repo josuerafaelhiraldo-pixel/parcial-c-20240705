@@ -24,6 +24,26 @@
 #define APP_PWM_FREQ_DEFAULT_HZ     1000U   /* arranque: 1 kHz ... */
 #define APP_PWM_DUTY_DEFAULT_PCT    25U     /* ... y 25 % */
 
+/* Maquina de estados (MANUAL / AUTO / PAUSA). */
+#define APP_RAMP_MIN_PCT        10U     /* AUTO: la rampa va de 10 % ... */
+#define APP_RAMP_MAX_PCT        90U     /* ... a 90 % y vuelve */
+#define APP_RAMP_STEP_MS        20U     /* 1 punto porcentual cada 20 ms (80 pasos = 1,6 s por tramo) */
+#define APP_LED_AUTO_MS         500U    /* AUTO: LD2 alterna cada 500 ms */
+#define APP_LED_PAUSE_MS        125U    /* PAUSA: LD2 alterna cada 125 ms */
+#define APP_TELEMETRY_MS        1000U   /* STREAM ON: una linea TEL cada 1000 ms */
+
+/* Interprete de ordenes. */
+#define APP_LINE_MAX            63U     /* caracteres por linea (mas el NUL) */
+#define APP_BYTES_PER_LOOP      32U     /* limite de bytes de RX atendidos por vuelta de main */
+#define APP_CONSOLE_ECHO        1       /* 1: la placa devuelve (eco) lo que se escribe */
+
+/* Diagnostico (no forma parte del protocolo del enunciado). 1 = existe la orden DIAG
+ * (DIAG MEASURE, DIAG PWMALL, DIAG STALL n, DIAG WRAP); 0 = DIAG responde ERR COMMAND. */
+#define APP_DIAG_ENABLED        1
+#define APP_DIAG_STALL_MIN_MS   100U
+#define APP_DIAG_STALL_MAX_MS   5000U
+#define APP_WRAP_TEST_START     0xFFFFF800U   /* DIAG WRAP: faltan 2048 ms para el desbordamiento de uint32 */
+
 /* Medidor interno del PWM: TIM2 en modo "entrada PWM" sobre PA0 (CH1).
  * Requiere un puente de PA6 a PA0 (Arduino A0). */
 #define APP_METER_PORT              GPIOA
@@ -40,9 +60,9 @@
  * Un buffer de N bytes guarda como maximo N-1 (siempre queda un hueco).
  * RX: 256 -> 255 utiles (el reto pide al menos 128). */
 #define APP_RX_BUF_SIZE     256U
-#define APP_TX_BUF_SIZE     512U
+#define APP_TX_BUF_SIZE     1024U
 
 /* Tamano maximo de un mensaje formateado con Console_Printf. */
-#define APP_PRINTF_MAX      128U
+#define APP_PRINTF_MAX      256U
 
 #endif /* APP_CONFIG_H */
