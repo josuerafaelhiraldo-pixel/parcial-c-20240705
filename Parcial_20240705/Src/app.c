@@ -1,6 +1,7 @@
-/* app.c - Hito 2: tick de 1 ms (TIM6), B1 por EXTI con antirrebote, consola.
+/* app.c - Hito 3: PWM por hardware (TIM3), medidor interno (TIM2), tick (TIM6),
+ * B1 por EXTI con antirrebote y consola.
  *
- * Aplicacion de prueba: eco por UART, control de LD2 y teclas de un solo
+ * Aplicacion de prueba: eco por UART, control de LD2, del PWM y teclas de un solo
  * caracter. Las teclas y las acciones de B1 (corta = alternar LD2, larga =
  * apagar LD2) son TEMPORALES: en el Hito 4 se reemplazan por la maquina de
  * estados y el interprete de ordenes (HELP, STATUS, MODE, ...). */
@@ -8,6 +9,9 @@
 #include "app_config.h"
 #include "button.h"
 #include "console.h"
+#include "pwm.h"
+#include "pwm_check.h"
+#include "pwm_meter.h"
 #include "tick.h"
 #include "stm32f4xx_hal.h"
 
@@ -49,12 +53,58 @@ static void print_tick(void)
 
 static void print_help(void)
 {
-    (void)Console_Write("Teclas de prueba (Hito 2):\r\n"
+    (void)Console_Write("Teclas de prueba (Hito 3):\r\n"
                         "  1 = LD2 encendido   0 = LD2 apagado   t = alternar LD2\r\n"
                         "  b = nivel de B1     s = estadisticas  m = comparar TIM6/SysTick\r\n"
                         "  w = prueba de desbordamiento del tiempo (UINT32_MAX en 2,05 s)\r\n"
+                        "  f = siguiente frecuencia PWM (500/1000/2000 Hz)\r\n"
+                        "  d = siguiente duty PWM (0/25/50/75/100 %)\r\n"
+                        "  p = medir el PWM actual (puente PA6-PA0)\r\n"
+                        "  a = autoprueba: 3 frecuencias x 5 duty (15 mediciones)\r\n"
                         "  h = esta ayuda\r\n"
                         "B1: corta = alternar LD2, larga (1,5 s) = apagar LD2\r\n");
+}
+
+static void print_pwm(void)
+{
+    PwmInfo pi;
+
+    Pwm_GetInfo(&pi);
+    (void)Console_Printf("PWM: %lu Hz, duty %lu %%  (reloj TIM3=%lu Hz, PSC=%lu, ARR=%lu, CCR=%lu)\r\n",
+                         (unsigned long)pi.freqHz, (unsigned long)pi.dutyPct,
+                         (unsigned long)pi.timerClkHz, (unsigned long)pi.prescaler,
+                         (unsigned long)pi.arr, (unsigned long)pi.ccr);
+}
+
+static void pwm_key(uint8_t c)
+{
+    static const uint32_t duties[5] = { 0U, 25U, 50U, 75U, 100U };
+    uint32_t f = Pwm_GetFreq();
+    uint32_t d = Pwm_GetDuty();
+    uint32_t i;
+
+    (void)Console_Write("\r\n");
+    if (PwmCheck_Busy()) {
+        (void)Console_Write("Hay una verificacion de PWM en curso; espera a que termine.\r\n");
+        return;
+    }
+    switch (c) {
+    case 'f':
+        (void)Pwm_SetFreq((f == 500U) ? 1000U : (f == 1000U) ? 2000U : 500U);
+        print_pwm();
+        break;
+    case 'd':
+        for (i = 0U; (i < 4U) && (duties[i] <= d); i++) { }     /* primer valor de la lista mayor que d */
+        (void)Pwm_SetDuty((duties[i] > d) ? duties[i] : duties[0]);
+        print_pwm();
+        break;
+    case 'p':
+        (void)PwmCheck_StartOne(Tick_Ms());
+        break;
+    default:   /* 'a' */
+        (void)PwmCheck_StartAll(Tick_Ms());
+        break;
+    }
 }
 
 static void print_stats(void)
@@ -76,6 +126,7 @@ static void print_stats(void)
                          (unsigned long)bs.edgesIsr, (unsigned long)bs.shortCount,
                          (unsigned long)bs.longCount, (unsigned long)bs.lastDurationMs,
                          (bs.pressed != 0U) ? "pulsado" : "suelto");
+    print_pwm();
 }
 
 static void handle_byte(uint8_t c)
@@ -131,6 +182,12 @@ static void handle_byte(uint8_t c)
         (void)Console_Printf("\r\nTick_Ms = %lu: UINT32_MAX en 2048 ms. Contadores de B1 en 0.\r\n",
                              (unsigned long)Tick_Ms());
         break;
+    case 'f':
+    case 'd':
+    case 'p':
+    case 'a':
+        pwm_key(c);
+        break;
     case 'h':
     case '?':
         (void)Console_Write("\r\n");
@@ -148,12 +205,15 @@ void App_Init(void)
     Tick_Init();
     s_lastService = Tick_Ms();
     Button_Init(s_lastService);
+    Pwm_Init();
+    Meter_Init();
     s_mTim = Tick_Ms();
     s_mSys = HAL_GetTick();
 
-    (void)Console_Write("\r\n=== Parcial 20240705 | NUCLEO-F446RE | Hito 2: tick TIM6 y B1 con antirrebote ===\r\n");
+    (void)Console_Write("\r\n=== Parcial 20240705 | NUCLEO-F446RE | Hito 3: PWM con TIM3 y medicion con TIM2 ===\r\n");
     (void)Console_Write("USART2 115200 8N1. Escribe h para ver las teclas de prueba.\r\n");
     (void)Console_Printf("B1 (PC13) en reposo: nivel %d\r\n", btn_level());
+    print_pwm();
 }
 
 void App_Loop(void)
@@ -170,6 +230,8 @@ void App_Loop(void)
         handle_byte(c);
         n++;
     }
+
+    PwmCheck_Service(now);          /* en cada vuelta: los flancos del medidor se leen por sondeo */
 
     /* Una vez por cada tick de 1 ms: antirrebote y clasificacion de B1. */
     if ((uint32_t)(now - s_lastService) >= 1U) {

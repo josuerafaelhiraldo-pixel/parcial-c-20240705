@@ -1,7 +1,8 @@
-/* Pruebas en PC de la aplicacion (app.c): teclas, LED, B1 por eventos, tick. */
+/* Pruebas en PC de la aplicacion (app.c): teclas, LED, B1 por eventos, tick, PWM y su verificacion. */
 #include "app.h"
 #include "console.h"
 #include "hal_sim.h"
+#include "pwm.h"
 #include "tick.h"
 #include <stdio.h>
 #include <string.h>
@@ -12,8 +13,19 @@ static int fails;
 static void feed(const char *s) { while (*s) sim_rx_byte((uint8_t)*s++); }
 static const char *out(void) { sim_tx_out[sim_tx_out_len] = 0; return (const char *)sim_tx_out; }
 static void clear(void) { sim_tx_out_len = 0; }
-/* n milisegundos de funcionamiento: tick de TIM6 + una vuelta de main por ms */
-static void ms(uint32_t n) { while (n--) { sim_tick(1); App_Loop(); sim_tx_drain(); } }
+/* n milisegundos de funcionamiento: tick de TIM6 y 10 vueltas de main por ms (100 us cada una),
+ * con el PWM generando flancos hacia el medidor */
+static void ms(uint32_t n)
+{
+    while (n--) {
+        sim_tick(1);
+        for (int k = 0; k < 10; k++) {
+            sim_pwm_run_us(100);
+            sim_tim2_enter(); App_Loop(); sim_tim2_leave();
+        }
+        sim_tx_drain();
+    }
+}
 static void run(void) { ms(20); }
 static void btn(int pressed)
 {
@@ -23,9 +35,13 @@ static void btn(int pressed)
 
 int main(void)
 {
+    sim_reset_pwm_model();
     sim_set_btn(1);                                       /* reposo en alto (con pull-up) */
     App_Init(); sim_tx_drain();
-    CHECK(strstr(out(), "Hito 2") != NULL);
+    CHECK(strstr(out(), "Hito 3") != NULL);
+    CHECK(strstr(out(), "PWM: 1000 Hz, duty 25 %  (reloj TIM3=84000000 Hz, PSC=83, ARR=999, CCR=250)") != NULL);
+    CHECK(Pwm_GetFreq() == 1000U && Pwm_GetDuty() == 25U);
+    CHECK(sim_pwm_start_calls == 1);                      /* el PWM arranca en App_Init */
     CHECK(strstr(out(), "nivel 1") != NULL);
     CHECK(sim_tim_start_calls == 1);                      /* App_Init arranca el tick */
     CHECK(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) == GPIO_PIN_RESET);   /* LD2 apagado al inicio */
@@ -102,6 +118,39 @@ int main(void)
     CHECK(strstr(out(), "[B1] corta #2") != NULL); clear();
     feed("m"); run(); ms(1000); clear(); feed("m"); ms(20);
     CHECK(strstr(out(), "diferencia=0 ms") != NULL); clear();
+
+    /* --- PWM: teclas f y d --- */
+    feed("f"); run(); CHECK(Pwm_GetFreq() == 2000U && Pwm_GetDuty() == 25U);
+    CHECK(strstr(out(), "PWM: 2000 Hz, duty 25 %  (reloj TIM3=84000000 Hz, PSC=83, ARR=499, CCR=125)") != NULL); clear();
+    feed("f"); run(); CHECK(Pwm_GetFreq() == 500U);  clear();
+    feed("f"); run(); CHECK(Pwm_GetFreq() == 1000U); clear();
+    { const uint32_t seq[6] = { 50U, 75U, 100U, 0U, 25U, 50U };
+      for (int i = 0; i < 6; i++) { feed("d"); run(); CHECK(Pwm_GetDuty() == seq[i]); clear(); } }
+    feed("d"); run(); feed("d"); run(); clear();                        /* 75, 100 */
+    CHECK(sim_unsafe_writes == 0);
+    CHECK(Pwm_Set(1000U, 25U));
+    feed("s"); run(); CHECK(strstr(out(), "PWM: 1000 Hz, duty 25 %") != NULL); clear();
+
+    /* --- tecla p: medida de la salida actual --- */
+    feed("p"); ms(300);
+    CHECK(strstr(out(), "[medida] 1000 Hz duty  25 % -> f=1000.0 Hz (+0.00 %) duty=25.00 % (+0.00 pp)") != NULL);
+    CHECK(strstr(out(), "OK") != NULL && strstr(out(), "FALLA") == NULL); clear();
+
+    /* --- tecla a: autoprueba; las teclas de PWM se rechazan mientras corre, B1 sigue vivo --- */
+    feed("a"); ms(100);
+    CHECK(strstr(out(), "Autoprueba PWM") != NULL); clear();
+    feed("f"); ms(5);
+    CHECK(strstr(out(), "en curso") != NULL); clear();
+    btn(1); ms(100); btn(0); ms(100);                                   /* corta durante la autoprueba */
+    CHECK(strstr(out(), "[B1] corta") != NULL); clear();
+    ms(3500);
+    CHECK(strstr(out(), "Resultado: 15/15 OK") != NULL);
+    CHECK(strstr(out(), "FALLA") == NULL);
+    CHECK(strstr(out(), "diferencia 0 ms") != NULL);
+    CHECK(Pwm_GetFreq() == 1000U && Pwm_GetDuty() == 25U);             /* restaurado */
+    clear();
+    feed("f"); run(); CHECK(Pwm_GetFreq() == 2000U); clear();          /* ya acepta teclas */
+    CHECK(Pwm_Set(1000U, 25U));
 
     feed("x"); run(); CHECK(strcmp(out(), "x") == 0); clear();          /* eco */
     feed("\r"); run(); CHECK(strcmp(out(), "\r\n") == 0); clear();     /* CR */
