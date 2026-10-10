@@ -79,15 +79,25 @@ int main(void)
     CHECK(strstr(out(), "diferencia=0 ms") != NULL);
     clear();
 
-    /* tecla w: tiempo inyectado cerca de UINT32_MAX; B1 sigue funcionando al cruzarlo */
+    /* tecla w: tiempo inyectado a 2048 ms de UINT32_MAX; B1 sigue funcionando al cruzarlo */
     feed("w"); run();
-    CHECK(strstr(out(), "UINT32_MAX en 4096 ms") != NULL); clear();
+    CHECK(strstr(out(), "UINT32_MAX en 2048 ms") != NULL); clear();
     CHECK(Tick_Ms() > 0xFFFFF000U);
     btn(1); ms(100); btn(0); ms(100);                     /* corta antes del desbordamiento */
     CHECK(strstr(out(), "[B1] corta #1") != NULL); clear();
-    btn(1); ms(5000); btn(0); ms(100);                    /* larga: cruza el desbordamiento */
-    CHECK(Tick_Ms() < 3000U);                             /* el contador dio la vuelta */
-    CHECK(strstr(out(), "[B1] larga #1") != NULL && strstr(out(), "corta") == NULL); clear();
+    ms(400);
+    btn(1); ms(5000); btn(0); ms(100);                    /* larga: empieza antes y termina despues del desbordamiento */
+    CHECK(Tick_Ms() < 5000U);                             /* el contador dio la vuelta */
+    CHECK(strstr(out(), "[B1] larga #1") != NULL && strstr(out(), "corta") == NULL);
+    {
+        const char *tag = "larga #1 (1500 ms), t=";
+        const char *q = strstr(out(), tag);
+        unsigned long tv = 999999UL;
+        CHECK(q != NULL);
+        if (q != NULL) { (void)sscanf(q + strlen(tag), "%lu", &tv); }
+        CHECK(tv < 500UL);                                /* la larga salio DESPUES de dar la vuelta (t pequeno) */
+    }
+    clear();
     btn(1); ms(100); btn(0); ms(100);                     /* y despues del desbordamiento */
     CHECK(strstr(out(), "[B1] corta #2") != NULL); clear();
     feed("m"); run(); ms(1000); clear(); feed("m"); ms(20);

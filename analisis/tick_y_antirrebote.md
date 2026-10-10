@@ -25,7 +25,7 @@ Aplica a `Src/tick.c`, `Src/button.c`, `Inc/app_config.h` y `Src/app.c`.
 - Forma incorrecta: `ahora >= antes + limite`. Con `antes = 0xFFFFFFFE` y `limite = 30`, `antes + limite` da la vuelta y vale 28, asi que la condicion se cumple de inmediato (falso positivo).
 - Esto vale para intervalos menores que 2^32 ms; los de este proyecto son de 1,5 s o menos.
 - Prueba en PC: `test_tick.c` y `test_button.c` cruzan el desbordamiento con pulsaciones cortas y largas.
-- Prueba en la placa: la tecla `w` pone el contador 4096 ms antes de UINT32_MAX (`Tick_SetMs`) y reinicia las marcas de tiempo del boton. Es la "prueba inyectada" del enunciado. Despues de `w` hay 4,1 s para pulsar B1 y cruzar el desbordamiento.
+- Prueba en la placa: la tecla `w` pone el contador 2048 ms antes de UINT32_MAX (`Tick_SetMs`) y reinicia las marcas de tiempo y contadores del boton. Es la "prueba inyectada" del enunciado. Procedimiento: pulsar `w`, esperar 1 s y mantener B1 3 s. Cada mensaje `[B1]` incluye `t=` (el valor de `Tick_Ms()` al emitirlo). Una larga se emite exactamente 1500 ms despues de validar la pulsacion. Por tanto, si `t` es menor de 1500 ms (valor ya posterior a la vuelta), la pulsacion se valido en `t - 1500`, es decir, antes del desbordamiento, y la temporizacion de 1500 ms lo cruzo. Si `t` sale mayor de 4 000 000 000, la larga salio antes de la vuelta; si sale mayor de 1500 ms pero pequeno, la pulsacion empezo despues de la vuelta. En ambos casos hay que repetir.
 
 ## 2. Interrupcion del pulsador (EXTI13, ambos flancos)
 
@@ -95,7 +95,7 @@ Casos especiales:
 
 Solo sirven para ver el resultado en la placa: corta = alternar LD2, larga = apagar LD2. En el Hito 4 se sustituyen por la maquina de estados (corta: MANUAL/AUTO; larga: PAUSA).
 
-Teclas nuevas: `m` compara el avance de TIM6 con el de SysTick desde la ultima pulsacion de `m`; `w` inyecta el tiempo cerca de UINT32_MAX. La tecla `s` ahora muestra tambien `flancos_isr`, `cortas`, `largas`, la ultima duracion y el estado del boton.
+Teclas nuevas: `m` compara el avance de TIM6 con el de SysTick desde la ultima pulsacion de `m`; `w` inyecta el tiempo cerca de UINT32_MAX. Los mensajes `[B1]` muestran el instante `t` (ms de `Tick_Ms()`). La tecla `s` ahora muestra tambien `flancos_isr`, `cortas`, `largas`, la ultima duracion y el estado del boton.
 
 Limitacion: TIM6 y SysTick salen del mismo reloj (HCLK), asi que `m` comprueba que TIM6 cuenta de verdad 1 ms por interrupcion, pero no mide la exactitud absoluta del reloj (HSI interno).
 

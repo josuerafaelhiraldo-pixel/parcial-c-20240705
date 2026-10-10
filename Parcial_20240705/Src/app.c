@@ -12,7 +12,7 @@
 #include "stm32f4xx_hal.h"
 
 #define APP_BYTES_PER_LOOP   32U    /* limite de trabajo por vuelta de main */
-#define APP_WRAP_TEST_START  0xFFFFF000U   /* tecla w: faltan 4096 ms para el desbordamiento de uint32 */
+#define APP_WRAP_TEST_START  0xFFFFF800U   /* tecla w: faltan 2048 ms para el desbordamiento de uint32 */
 
 static uint8_t  s_prev;             /* byte anterior (para tratar CRLF como uno solo) */
 static uint32_t s_lastService;      /* ultimo tick de 1 ms atendido */
@@ -52,7 +52,7 @@ static void print_help(void)
     (void)Console_Write("Teclas de prueba (Hito 2):\r\n"
                         "  1 = LD2 encendido   0 = LD2 apagado   t = alternar LD2\r\n"
                         "  b = nivel de B1     s = estadisticas  m = comparar TIM6/SysTick\r\n"
-                        "  w = prueba de desbordamiento del tiempo (UINT32_MAX en 4,1 s)\r\n"
+                        "  w = prueba de desbordamiento del tiempo (UINT32_MAX en 2,05 s)\r\n"
                         "  h = esta ayuda\r\n"
                         "B1: corta = alternar LD2, larga (1,5 s) = apagar LD2\r\n");
 }
@@ -121,14 +121,14 @@ static void handle_byte(uint8_t c)
         print_tick();
         break;
     case 'w':
-        /* Prueba inyectada: el contador salta a 4096 ms antes de UINT32_MAX. Se
+        /* Prueba inyectada: el contador salta a 2048 ms antes de UINT32_MAX. Se
          * reinician las marcas de tiempo del modulo del boton y los contadores. */
         Tick_SetMs(APP_WRAP_TEST_START);
         s_lastService = Tick_Ms();
         Button_Init(s_lastService);
         s_mTim = Tick_Ms();
         s_mSys = HAL_GetTick();
-        (void)Console_Printf("\r\nTick_Ms = %lu: UINT32_MAX en 4096 ms. Contadores de B1 en 0.\r\n",
+        (void)Console_Printf("\r\nTick_Ms = %lu: UINT32_MAX en 2048 ms. Contadores de B1 en 0.\r\n",
                              (unsigned long)Tick_Ms());
         break;
     case 'h':
@@ -179,13 +179,14 @@ void App_Loop(void)
             Button_GetStats(&bs);
             if (ev == BTN_EVT_SHORT) {
                 HAL_GPIO_TogglePin(APP_LED_PORT, APP_LED_PIN);
-                (void)Console_Printf("\r\n[B1] corta #%lu, duracion %lu ms\r\n",
+                (void)Console_Printf("\r\n[B1] corta #%lu, duracion %lu ms, t=%lu ms\r\n",
                                      (unsigned long)bs.shortCount,
-                                     (unsigned long)bs.lastDurationMs);
+                                     (unsigned long)bs.lastDurationMs,
+                                     (unsigned long)now);
             } else {
                 led_set(false);
-                (void)Console_Printf("\r\n[B1] larga #%lu (1500 ms)\r\n",
-                                     (unsigned long)bs.longCount);
+                (void)Console_Printf("\r\n[B1] larga #%lu (1500 ms), t=%lu ms\r\n",
+                                     (unsigned long)bs.longCount, (unsigned long)now);
             }
         }
     }
