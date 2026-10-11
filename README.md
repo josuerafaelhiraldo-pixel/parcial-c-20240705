@@ -10,6 +10,13 @@ Primer Parcial 1L C3-2026 · Code Challenge · Aplicación bare-metal en C, sin 
 > Con autorización del docente, el trabajo se implementa en la NUCLEO-F446RE,
 > usando los periféricos equivalentes que se listan abajo.
 
+## Video de demostración
+
+**Video (3–5 min, Google Drive): [Video en Google Drive](https://drive.google.com/drive/folders/1ppLJ-GPRubpzerDcrkRa_R3TKzFTk_N-?usp=sharing)**
+
+Muestra el arranque, los LED en cada estado (fijo en MANUAL, 500 ms en AUTO, 125 ms en PAUSA), la rampa del LED externo,
+las órdenes y los errores de la consola, el botón B1 (corta y larga) y los resultados de las pruebas.
+
 ## Versiones de herramientas
 
 | Herramienta | Versión |
@@ -97,8 +104,8 @@ stateDiagram-v2
 |---|---|
 | `Parcial_20240705/` | Proyecto de STM32CubeIDE (`Src/`, `Inc/`, `Drivers/`, `.ioc`) |
 | `analisis/` | Documentos de diseño (`uart_buffers.md`: buffers UART; `tick_y_antirrebote.md`: tick, EXTI y antirrebote; `pwm_y_medicion.md`: PWM, medición interna y limitaciones; `estados_y_comandos.md`: máquina de estados, intérprete de órdenes y telemetría) |
-| `pruebas/` | Resultados de pruebas (`hito1_resultados.md`, `hito2_resultados.md`, `hito3_resultados.md`, `hito4_resultados.md`) y pruebas de lógica en PC (`host/`) |
-| `evidencias/` | Capturas, fotos, mediciones y enlace al video (`hito1/`, `hito2/`, `hito3/`, `hito4/`) |
+| `pruebas/` | Resultados de pruebas (`hito1_resultados.md` ... `hito5_resultados.md`), pruebas de lógica en PC (`host/`) y herramientas de las pruebas de aceptación (`herramientas/`: macros de Tera Term, `analizar_logs.py` y `LEEME.md`) |
+| `evidencias/` | Capturas, fotos, mediciones y registros (`hito1/`, `hito2/`, `hito3/`, `hito4/`; `hito5/`: registros `.log` de las pruebas de aceptación y `analisis_logs.txt`). El enlace al video está al inicio de este README |
 
 ## Código del SDK y aporte propio
 
@@ -125,31 +132,55 @@ stateDiagram-v2
 
 ## Pruebas de aceptación
 
-| Prueba | Resultado esperado | Estado |
-|---|---|---|
-| Encendido | MANUAL, 1000 Hz, 25 %, STREAM OFF | Hecho en la placa (Hito 4): banner, `Modo MANUAL, STREAM OFF.` y `STATUS` (`evidencias/hito4/01_boot_help_status.png`) |
-| DUTY 0 / 50 / 100 | Nivel bajo / 50 % / nivel alto | Parcial: 0 % y 100 % constantes sin pulsos y 50 % medido en las tres frecuencias (Hito 3); `DUTY 40` y `DUTY 60` por comando funcionan (Hito 4); falta repetir 0, 50 y 100 por comando |
-| FREQ 500 / 1000 / 2000 | Error de frecuencia ≤ 2 %; el tick sigue en 1 ms | Parcial: error medido +0,00 % y tick sin cambios (Hito 3); `FREQ 500` y `FREQ 2000` por comando, medido +0,00 % a 500 Hz (Hito 4); falta repetir las tres |
-| AUTO durante 3,2 s | Vuelve a 10 % tras subir a 90 % y bajar | Parcial: rampa verificada milisegundo a milisegundo en las pruebas de PC y observada en la placa con `TEL` y los LED (Hito 4); falta la medición en la placa (Hito 5) |
-| 20 pulsaciones cortas | 20 eventos, sin duplicados | Pendiente |
-| Mantener el botón 3 s | Una larga; al soltar no genera corta | Parcial: Hito 2 (10,7 s, una larga) y Hito 4 (largas de unos 2 s con la aplicación integrada: un solo `EVT long`); falta repetir con 3 s |
-| PAUSA desde AUTO y RESUME | Duty 0 en pausa; continúa desde el valor y la dirección guardados | Hecho en la placa (Hito 4): `duty=0` en PAUSA y `RESUME` continúa desde el valor guardado (`evidencias/hito4/03_boton_eventos.png`) |
-| DUTY 20abc / -1 / 101 | ERR, sin modificar el duty | Hecho en la placa (Hito 4): `ERR ARG`, `ERR RANGE`, `ERR RANGE`; el duty no cambió (`evidencias/hito4/02_comandos_errores.png`) |
-| Línea de 100 caracteres y luego STATUS | ERR OVERFLOW; STATUS posterior funciona | Parcial: líneas largas dieron `ERR OVERFLOW` y el `STATUS` siguiente funcionó (Hito 4); falta repetir con 100 caracteres exactos |
-| CR, LF y CRLF | Una ejecución por orden | Pendiente |
-| STREAM ON con 10 órdenes/s por 30 s | Sin reinicios ni pérdidas | Pendiente |
-| Desbordamiento de RX provocado | Error contabilizado y recuperación en la siguiente línea | Pendiente |
-| Tiempo cerca de UINT32_MAX | La temporización continúa al desbordar | Pendiente |
+Las 13 pruebas del enunciado se ejecutaron en la placa con el firmware del Hito 4, sin cambios. Los registros completos están en
+`evidencias/hito5/` y el análisis de cada uno en `evidencias/hito5/analisis_logs.txt` (**124 de 124 comprobaciones correctas**).
+Detalle, observaciones y limitaciones en `pruebas/hito5_resultados.md`.
 
-Resultados de las pruebas previas de GPIO y consola (Hito 1): `pruebas/hito1_resultados.md`.
-Resultados de tick, interrupción del botón y antirrebote (Hito 2): `pruebas/hito2_resultados.md`.
-Las pruebas de aceptación de «20 pulsaciones cortas», «Mantener el botón 3 s» y «Tiempo cerca de UINT32_MAX»
-se hicieron en el Hito 2 con la aplicación de prueba y se repetirán con la aplicación integrada (Hito 5).
+| # | Prueba | Resultado esperado | Resultado en la placa | Estado | Registro (`evidencias/hito5/`) |
+|---|---|---|---|---|---|
+| 1 | Encendido | MANUAL, 1000 Hz, 25 %, STREAM OFF | `STATUS` tras RESET: `mode=MANUAL freq=1000 duty=25 stream=OFF` | Hecho | `prueba_00_humo.log` |
+| 2 | `DUTY 0 / 50 / 100` | Nivel bajo / 50 % / nivel alto | 0 %: sin flancos, nivel bajo; 50 %: 50,00 % (+0,00 pp); 100 %: sin flancos, nivel alto | Hecho | `prueba_01_duty_freq.log` |
+| 3 | `FREQ 500 / 1000 / 2000` | Error ≤ 2 %; el tick sigue en 1 ms | +0,00 % en las tres; `TEL` separadas exactamente 1000 ms durante los cambios | Hecho | `prueba_01_duty_freq.log` |
+| 4 | AUTO durante 3,2 s | Regresa a 10 % tras subir a 90 % y bajar | `TEL` coincide con el triángulo 10-90-10 de ciclo 3,2 s (diferencia máxima 1 punto) | Hecho | `prueba_02_auto_pausa.log` |
+| 5 | 20 pulsaciones cortas | 20 eventos, sin duplicados | 20 `EVT B1 short ok`, `n_short` de 1 a 20, `short=20` | Hecho | `prueba_08_boton.log` |
+| 6 | Mantener el botón 3 s | Una larga; al soltar no genera corta | Una `EVT B1 long ok`, sin corta al soltar: `short=20 long=1` | Hecho | `prueba_08_boton.log` |
+| 7 | PAUSA desde AUTO y RESUME | Duty 0 en pausa; continúa desde el valor y la dirección guardados | `duty=0` en PAUSA; `ramp=16 dir=down` sin cambios en 2,5 s; `RESUME` continúa con el mismo ritmo | Hecho | `prueba_02_auto_pausa.log` |
+| 8 | `DUTY 20abc` / `-1` / `101` | ERR, sin modificar el duty | `ERR ARG`, `ERR RANGE`, `ERR RANGE`; con 19 órdenes inválidas el duty siguió en 40 | Hecho | `prueba_03_errores_y_lineas.log` |
+| 9 | Línea de 100 caracteres y luego `STATUS` | `ERR OVERFLOW`; `STATUS` posterior funciona | `ERR OVERFLOW` y `STATUS` normal; límite exacto: 63 caracteres OK, 64 `ERR OVERFLOW` | Hecho | `prueba_03_errores_y_lineas.log` |
+| 10 | CR, LF y CRLF | Una ejecución por orden | 20 respuestas para 20 órdenes, en orden; `cmd_ok` +18 exacto | Hecho | `prueba_04_terminadores.log` |
+| 11 | `STREAM ON` y 10 órdenes/s por 30 s | Sin reinicios ni pérdidas; rampa y botón operativos | 300 órdenes sin errores ni pérdidas (`cmd_ok=305`, `err_*=0`, `rx_lost=0`, `tx_drop=0`), rampa y 6 pulsaciones de B1 atendidas; ritmo logrado 8,1 órdenes/s | Hecho (ritmo 8,1/s) | `prueba_05_carga_10_por_segundo.log` |
+| 12 | Desbordamiento de RX provocado | Error contabilizado y recuperación en la siguiente línea | `ERR OVERFLOW`, `err_ovf=1 rx_lost=233`; `DUTY 44` siguiente se ejecutó y no se ejecutó ningún fragmento | Hecho | `prueba_06_overflow_rx.log` |
+| 13 | Tiempo cerca de UINT32_MAX | La temporización continúa al desbordar | `up=4294967248` → `up=952`, `TEL` siempre a 1000 ms y rampa a 20 ms por punto tras la vuelta | Hecho | `prueba_07_desbordamiento_uint32.log` |
 
-Resultados del PWM y su medición (Hito 3): `pruebas/hito3_resultados.md`.
-Las pruebas «Encendido», «DUTY 0 / 50 / 100» y «FREQ 500 / 1000 / 2000» se verificaron en el Hito 3 a nivel de PWM, con teclas temporales; en el Hito 4 se usaron órdenes de la consola y se repetirán completas en el Hito 5.
+Duty de 25, 50 y 75 % (tolerancia ±2 puntos): autoprueba del Hito 3, 15/15 combinaciones, error de duty máximo −0,01 puntos
+(`evidencias/hito3/06_autoprueba_15_de_15.png`); 50 % repetido por orden de consola en las tres frecuencias en las pruebas 2 y 3 del Hito 5.
 
-Resultados de la aplicación integrada, la consola y el botón (Hito 4): `pruebas/hito4_resultados.md`.
+Tiempos de respuesta (órdenes ≤ 100 ms, botón ≤ 50 ms): garantizados por diseño (`main` nunca espera, cola TX, antirrebote de 30 ms) y
+comprobados en el simulador de PC; no se midieron en la placa con un reloj externo (ver `pruebas/hito5_resultados.md`).
+
+Resultados anteriores: GPIO y consola (Hito 1) en `pruebas/hito1_resultados.md`; tick, interrupción del botón y antirrebote (Hito 2)
+en `pruebas/hito2_resultados.md`; PWM y su medición (Hito 3) en `pruebas/hito3_resultados.md`; aplicación integrada, consola y botón
+(Hito 4) en `pruebas/hito4_resultados.md`.
+
+### Cómo repetir las pruebas de aceptación
+
+1. Pulsar RESET y abrir Tera Term en el puerto del ST-LINK (115200 8N1, sin control de flujo, Local echo apagado, Enter = CR).
+2. Control → Macro… y elegir una de `pruebas/herramientas/prueba_0N_*.ttl` (si el repositorio está en otra ruta, cambiar la línea
+   `logfile = '...'` de la macro). Cada macro deja su registro en `evidencias/hito5/`.
+3. La prueba del botón (20 cortas y una larga) se hace a mano con `STREAM ON`; el procedimiento está en `pruebas/herramientas/LEEME.md`.
+4. `python pruebas/herramientas/analizar_logs.py` (Python 3, sin dependencias) revisa los registros y muestra OK o FALLA por comprobación.
+5. Pruebas de lógica en PC: `sh pruebas/host/run_tests.sh` (requiere `gcc`).
+
+Extracto del registro de la prueba del botón (`prueba_08_boton.log`):
+
+```
+EVT B1 short ok mode=AUTO duty=10 n_short=1 n_long=0
+EVT B1 short ok mode=MANUAL duty=25 n_short=2 n_long=0
+...
+EVT B1 short ok mode=MANUAL duty=25 n_short=20 n_long=0
+EVT B1 long ok mode=PAUSA duty=0 n_short=20 n_long=1
+OK mode=PAUSA freq=1000 duty=0 manual=25 ramp=77 dir=up resume=MANUAL ... short=20 long=1 short_ign=0 ... err_cmd=0 ... rx_lost=0 uart_err=0 tx_drop=0
+```
 
 ### Verificación de frecuencia y duty del PWM
 
@@ -168,7 +199,7 @@ No se dispone de osciloscopio ni de analizador lógico. El docente indicó que e
 | 2. Interrupciones y antirrebote | Hecho (2026-10-10) | `Agrego tick de 1 ms con interrupcion de TIM6`; `Agrego boton B1 con EXTI en ambos flancos y antirrebote de 30 ms`; `Hito 2: integro tick y boton en la app, con pruebas en PC y analisis`; commit de evidencias del Hito 2. Evidencias en `evidencias/hito2/` |
 | 3. TIMER y PWM | Hecho (2026-10-10) | `Configuro TIM2 en CubeMX para medir el PWM`; `Agrego modulo PWM con TIM3: frecuencia, duty y niveles 0 y 100 %`; `Agrego medidor interno del PWM con TIM2 en modo captura`; `Hito 3: autoprueba del PWM y teclas de control`; `Hito 3: agrego evidencias, resultados y actualizo el README`. Evidencias en `evidencias/hito3/` |
 | 4. Integración y comandos | Hecho (2026-10-10) | `Hito 4: lectura de linea y analisis de ordenes (line, cmd) con pruebas`; `Hito 4: maquina de estados MANUAL/AUTO/PAUSA y rampa (ctrl)`; `Hito 4: interprete de ordenes, telemetria e integracion (shell, app, consola)`; `Hito 4: evidencias, resultados y README`. Evidencias en `evidencias/hito4/` |
-| 5. Pruebas y correcciones | Pendiente | — |
+| 5. Pruebas y correcciones | Hecho (2026-10-11) | `Hito 5: macros de Tera Term y analizador de registros`; `Hito 5: registros de las pruebas de aceptacion`; `Hito 5: resultados, README y enlace al video`. Evidencias en `evidencias/hito5/` |
 
 ### Hito 1: GPIO y consola
 
@@ -232,7 +263,7 @@ Más evidencia en `evidencias/hito3/` y detalle en `pruebas/hito3_resultados.md`
 - Medición con `DUTY 40` y `FREQ 500`: f = 500,0 Hz (+0,00 %), duty = 39,99 % (-0,01 puntos), n = 98.
 - 110 errores inyectados a propósito en el código fueron detectados por las pruebas de PC.
 - Observación: pegando un bloque de órdenes justo tras un reset, la primera línea respondió `ERR COMMAND` dos veces; escrita a mano o con una línea en blanco antes funciona. Se atribuye a un byte invisible del texto copiado, no confirmado (detalle en `pruebas/hito4_resultados.md`).
-- Limitaciones: si se pierde o daña un byte de RX se vacía el buffer y puede perderse una orden válida que esperaba (nunca se ejecuta un fragmento). Las pruebas de aceptación con registros completos de CR/LF/CRLF, 100 caracteres, 10 órdenes por segundo, desbordamiento de RX y UINT32_MAX quedan para el Hito 5.
+- Limitaciones: si se pierde o daña un byte de RX se vacía el buffer y puede perderse una orden válida que esperaba (nunca se ejecuta un fragmento). Las pruebas de aceptación con registros completos de CR/LF/CRLF, 100 caracteres, 10 órdenes por segundo, desbordamiento de RX y UINT32_MAX se hicieron en el Hito 5.
 
 ![Pulsaciones de B1, PAUSA y RESUME con STREAM ON](evidencias/hito4/03_boton_eventos.png)
 
@@ -240,15 +271,29 @@ Más evidencia en `evidencias/hito3/` y detalle en `pruebas/hito3_resultados.md`
 
 Más evidencia en `evidencias/hito4/` y detalle en `pruebas/hito4_resultados.md` y `analisis/estados_y_comandos.md`.
 
+### Hito 5: pruebas, correcciones y entrega final
+
+- Las 13 pruebas de aceptación pasaron en la placa con el firmware del Hito 4, sin corregir el código (tabla de «Pruebas de aceptación»).
+- Ocho macros de Tera Term (`pruebas/herramientas/prueba_00_*.ttl` ... `prueba_07_*.ttl`) envían las órdenes con bytes y ritmo exactos y guardan cada sesión en `evidencias/hito5/*.log`; la prueba del botón se hizo a mano y se registró en `prueba_08_boton.log`.
+- `analizar_logs.py` comprueba cada registro (respuestas exactas, contadores, telemetría separada 1000 ms, rampa de AUTO contra el modelo triangular): 124 de 124 comprobaciones correctas, salida en `evidencias/hito5/analisis_logs.txt`.
+- Carga: 300 órdenes con `STREAM ON`, AUTO y B1 activos, sin errores ni pérdidas. El ritmo en la placa fue de 8,1 órdenes/s (la macro de Windows no alcanza 10/s; el ritmo exacto de 10/s durante 30 s se cumple en las pruebas de PC).
+- Desbordamiento de RX: 233 bytes perdidos con la placa sin leer 3 s, un `ERR OVERFLOW`, y la siguiente orden se ejecutó sin ejecutar fragmentos.
+- Cruce de UINT32_MAX: la telemetría pasó de `up=4294967248` a `up=952` con separación de 1000 ms y la rampa siguió a 20 ms por punto.
+- Limitaciones: los tiempos de respuesta (100 ms) y del botón (50 ms) no se midieron en la placa con un reloj externo; la medición del PWM es interna (ver arriba).
+
+Detalle en `pruebas/hito5_resultados.md`.
+
 ## Estado actual
 
-- Hecho: proyecto base generado con CubeMX (TIM3 PWM, TIM6 tick, TIM2 medidor, USART2, EXTI13 y LD2),
-  Hito 1 (GPIO y consola), Hito 2 (tick de 1 ms, EXTI de B1 y antirrebote), Hito 3 (PWM de hardware y
-  medición interna) y Hito 4 (máquina de estados, rampa de AUTO, intérprete de órdenes, telemetría e
-  integración) probados en la placa.
-- Pendiente: pruebas de aceptación con registros completos (Hito 5), video y ajustes finales.
-- Limitaciones conocidas: la medición del PWM es interna y comparte reloj con el PWM (ver arriba); las órdenes
-  `DIAG` no forman parte del protocolo del enunciado; si se pierde un byte de RX puede perderse una orden válida
-  que esperaba en el buffer (detalle en `analisis/estados_y_comandos.md`).
-- Errores conocidos: ninguno confirmado. Observado: el primer comando pegado tras un reset respondió `ERR COMMAND`
-  en dos ocasiones, atribuido a un byte invisible del texto copiado (ver `pruebas/hito4_resultados.md`).
+- Hecho: los cinco hitos. Proyecto base generado con CubeMX (TIM3 PWM, TIM6 tick, TIM2 medidor, USART2, EXTI13 y LD2),
+  GPIO y consola (Hito 1), tick de 1 ms, EXTI de B1 y antirrebote (Hito 2), PWM de hardware y medición interna (Hito 3),
+  máquina de estados, rampa de AUTO, intérprete de órdenes, telemetría e integración (Hito 4) y las 13 pruebas de aceptación
+  con registros completos (Hito 5), todo probado en la placa.
+- Entrega: repositorio, video (enlace al inicio de este README) y resultados de pruebas en `pruebas/hito5_resultados.md`.
+- Limitaciones conocidas: la medición del PWM es interna y comparte reloj con el PWM (ver «Verificación de frecuencia y duty del PWM»);
+  los tiempos de respuesta de 100 ms y 50 ms no se midieron en la placa con un reloj externo; la prueba de carga en la placa alcanzó
+  8,1 órdenes/s; las órdenes `DIAG` no forman parte del protocolo del enunciado; si se pierde un byte de RX puede perderse una orden
+  válida que esperaba en el buffer (detalle en `analisis/estados_y_comandos.md`).
+- Errores conocidos: ninguno confirmado. Observado en el Hito 4: el primer comando pegado tras un reset respondió `ERR COMMAND` en dos
+  ocasiones, atribuido a un byte invisible del texto copiado; no se repitió en las ocho macros del Hito 5 (ver `pruebas/hito4_resultados.md`
+  y `pruebas/hito5_resultados.md`).
