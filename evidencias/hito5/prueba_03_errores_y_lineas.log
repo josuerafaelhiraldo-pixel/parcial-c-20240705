@@ -1,0 +1,58 @@
+STATUS
+OK mode=MANUAL freq=1000 duty=25 manual=25 ramp=10 dir=up resume=- uptime_ms=68416 stream=OFF short=0 long=0 short_ign=0 cmd_ok=0 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+DUTY 40
+OK DUTY 40
+STATUS
+OK mode=MANUAL freq=1000 duty=40 manual=40 ramp=10 dir=up resume=- uptime_ms=69054 stream=OFF short=0 long=0 short_ign=0 cmd_ok=2 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+DUTY 20abc
+ERR ARG
+DUTY -1
+ERR RANGE
+DUTY 101
+ERR RANGE
+DUTY
+ERR ARG
+DUTY 5 6
+ERR ARG
+DUTY 99999999999999999999
+ERR RANGE
+DUTY 4294967396
+ERR RANGE
+FREQ 750
+ERR RANGE
+FREQ
+ERR ARG
+MODE
+ERR ARG
+MODE FOO
+ERR ARG
+MODE AUTO X
+ERR ARG
+duty 10
+ERR COMMAND
+FOO
+ERR COMMAND
+STREAM
+ERR ARG
+STREAM MAYBE
+ERR ARG
+HELP me
+ERR ARG
+RESUME
+ERR STATE
+STATUS
+OK mode=MANUAL freq=1000 duty=40 manual=40 ramp=10 dir=up resume=- uptime_ms=75247 stream=OFF short=0 long=0 short_ign=0 cmd_ok=3 err_cmd=2 err_arg=10 err_range=5 err_state=1 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+   DUTY 45   
+OK DUTY 45
+STATUS
+OK mode=MANUAL freq=1000 duty=45 manual=45 ramp=10 dir=up resume=- uptime_ms=75899 stream=OFF short=0 long=0 short_ign=0 cmd_ok=5 err_cmd=2 err_arg=10 err_range=5 err_state=1 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+STATUS                                                         
+OK mode=MANUAL freq=1000 duty=45 manual=45 ramp=10 dir=up resume=- uptime_ms=76231 stream=OFF short=0 long=0 short_ign=0 cmd_ok=6 err_cmd=2 err_arg=10 err_range=5 err_state=1 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+STATUS                                                          
+ERR OVERFLOW
+STATUS
+OK mode=MANUAL freq=1000 duty=45 manual=45 ramp=10 dir=up resume=- uptime_ms=77091 stream=OFF short=0 long=0 short_ign=0 cmd_ok=7 err_cmd=2 err_arg=10 err_range=5 err_state=1 err_ovf=1 rx_lost=0 uart_err=0 tx_drop=0
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+ERR OVERFLOW
+STATUS
+OK mode=MANUAL freq=1000 duty=45 manual=45 ramp=10 dir=up resume=- uptime_ms=77943 stream=OFF short=0 long=0 short_ign=0 cmd_ok=8 err_cmd=2 err_arg=10 err_range=5 err_state=1 err_ovf=2 rx_lost=0 uart_err=0 tx_drop=0

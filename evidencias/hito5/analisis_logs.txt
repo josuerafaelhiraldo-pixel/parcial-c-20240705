@@ -1,0 +1,153 @@
+
+== prueba_00_humo: Humo (macro y registro)
+  [OK ] STATUS responde
+  [OK ] HELP lista las ordenes y termina en OK
+  [OK ] Estado inicial MANUAL, 1000 Hz, 25 %, STREAM OFF
+
+== prueba_01_duty_freq: DUTY 0/50/100 y FREQ 500/1000/2000
+  [OK ] Sin reinicios durante la prueba
+  [OK ] Hay 8 respuestas STATUS
+  [OK ] STATUS 1: 1000 Hz, duty 25 %
+  [OK ] STATUS 2: 1000 Hz, duty 0 %
+  [OK ] STATUS 3: 1000 Hz, duty 50 %
+  [OK ] STATUS 4: 1000 Hz, duty 100 %
+  [OK ] STATUS 5: 500 Hz, duty 50 %
+  [OK ] STATUS 6: 1000 Hz, duty 50 %
+  [OK ] STATUS 7: 2000 Hz, duty 50 %
+  [OK ] STATUS 8: 2000 Hz, duty 50 %
+  [OK ] Sin respuestas ERR
+  [OK ] Hay 6 medidas
+  [OK ] Medida 1 (1000 Hz, 0 %)
+  [OK ] Medida 2 (1000 Hz, 50 %)
+  [OK ] Medida 3 (1000 Hz, 100 %)
+  [OK ] Medida 4 (500 Hz, 50 %)
+  [OK ] Medida 5 (1000 Hz, 50 %)
+  [OK ] Medida 6 (2000 Hz, 50 %)
+  [OK ] Telemetria: al menos 15 lineas
+  [OK ] Tick de 1 ms intacto: todas las lineas TEL separadas exactamente 1000 ms durante los cambios de frecuencia
+
+== prueba_02_auto_pausa: AUTO 3,2 s, PAUSA y RESUME
+  [OK ] Sin reinicios durante la prueba
+  [OK ] Hay 8 respuestas STATUS
+  [OK ] MODE AUTO responde OK MODE AUTO duty=10
+  [OK ] Antes de AUTO: MANUAL 25 %
+  [OK ] En AUTO: modo AUTO
+  [OK ] Fase de la rampa constante entre muestras (ciclo de 3,2 s, error maximo 17 ms)
+  [OK ] Duty de la telemetria coincide con la rampa 10-90-10 (max diferencia 1 puntos, 10 lineas)
+  [OK ] La rampa se mantuvo entre 10 y 90 %
+  [OK ] PAUSA: modo PAUSA y duty 0
+  [OK ] PAUSA conserva rampa, direccion y duty manual (2,5 s despues no cambian)
+  [OK ] La telemetria sigue en PAUSA con duty 0
+  [OK ] RESUME responde con el valor guardado
+  [OK ] Tras RESUME: modo AUTO, sin recuperar pasos del tiempo en pausa (diferencia <= 25 puntos)
+  [OK ] La rampa continua tras RESUME con el mismo ritmo (max diferencia 0 puntos)
+  [OK ] Volver a MANUAL restaura el duty manual (25 %)
+  [OK ] Telemetria separada 1000 ms
+  [OK ] Sin respuestas ERR
+
+== prueba_03_errores_y_lineas: Errores y limites de linea
+  [OK ] Sin reinicios durante la prueba
+  [OK ] Numero de respuestas = numero de ordenes (29)
+  [OK ] STATUS                                     -> OK mode=
+  [OK ] DUTY 40                                    -> OK DUTY 40
+  [OK ] STATUS                                     -> OK mode=
+  [OK ] DUTY 20abc                                 -> ERR ARG
+  [OK ] DUTY -1                                    -> ERR RANGE
+  [OK ] DUTY 101                                   -> ERR RANGE
+  [OK ] DUTY                                       -> ERR ARG
+  [OK ] DUTY 5 6                                   -> ERR ARG
+  [OK ] DUTY 99999999999999999999                  -> ERR RANGE
+  [OK ] DUTY 4294967396                            -> ERR RANGE
+  [OK ] FREQ 750                                   -> ERR RANGE
+  [OK ] FREQ                                       -> ERR ARG
+  [OK ] MODE                                       -> ERR ARG
+  [OK ] MODE FOO                                   -> ERR ARG
+  [OK ] MODE AUTO X                                -> ERR ARG
+  [OK ] duty 10                                    -> ERR COMMAND
+  [OK ] FOO                                        -> ERR COMMAND
+  [OK ] STREAM                                     -> ERR ARG
+  [OK ] STREAM MAYBE                               -> ERR ARG
+  [OK ] HELP me                                    -> ERR ARG
+  [OK ] RESUME                                     -> ERR STATE
+  [OK ] STATUS                                     -> OK mode=
+  [OK ]    DUTY 45                                 -> OK DUTY 45
+  [OK ] STATUS                                     -> OK mode=
+  [OK ] STATUS + 57 espacios (63 caracteres)       -> OK mode=
+  [OK ] STATUS + 58 espacios (64 caracteres)       -> ERR OVERFLOW
+  [OK ] STATUS                                     -> OK mode=
+  [OK ] 100 caracteres X                           -> ERR OVERFLOW
+  [OK ] STATUS                                     -> OK mode=
+  [OK ] El duty no cambio con ningun rechazo (40 antes y despues de las 19 ordenes invalidas)
+  [OK ] Contadores finales: err_cmd=2 err_arg=10 err_range=5 err_state=1 err_ovf=2
+  [OK ] Sin bytes perdidos ni errores de UART
+  [OK ] El duty final es el de la ultima orden valida (45)
+
+== prueba_04_terminadores: CR, LF y CRLF
+  [OK ] Sin reinicios durante la prueba
+  [OK ] Una respuesta por orden: 20 respuestas (esperadas 20)
+  [OK ] Cada respuesta corresponde a su orden y en orden (CR, LF y CRLF, solos y en rafaga)
+  [OK ] Ninguna respuesta de error
+  [OK ] cmd_ok aumento exactamente en las 18 ordenes (+ el STATUS inicial)
+  [OK ] Sin errores de ordenes ni de UART
+  [OK ] Duty final 72
+
+== prueba_05_carga_10_por_segundo: STREAM ON y 10 ordenes por segundo
+  [OK ] Sin reinicios durante la prueba
+  [OK ] Sin respuestas ERR bajo carga
+  [OK ] 100 respuestas OK FREQ 500 y 100 OK FREQ 2000
+  [OK ] Hay 103 respuestas STATUS (1 + 100 + 2)
+  [OK ] cmd_ok del ultimo STATUS = respuestas OK recibidas antes (ninguna orden perdida)
+  [OK ] Contadores de error en 0 (ordenes, UART, bytes perdidos, cola TX)
+  [OK ] El uptime siempre crece (sin reinicios)
+  [OK ] Ritmo logrado: 8.1 ordenes por segundo (300 ordenes en 37.1 s)
+  [OK ] La rampa de AUTO siguio funcionando bajo carga (45 valores distintos en los STATUS)
+  [OK ] Telemetria: 40 lineas separadas exactamente 1000 ms
+  [OK ] Eventos de B1 durante la carga: 6
+  [OK ] Todos los eventos de B1 son pulsaciones cortas validas (short ok)
+
+== prueba_06_overflow_rx: Desbordamiento de RX
+  [OK ] Sin reinicios durante la prueba
+  [OK ] Secuencia de respuestas: STATUS, STALL, ERR OVERFLOW, STATUS, DUTY 44, STATUS
+  [OK ] Antes: sin errores ni bytes perdidos
+  [OK ] Despues: error contabilizado (err_ovf=1, rx_lost=233 bytes perdidos)
+  [OK ] Recuperacion: la orden siguiente (DUTY 44) se ejecuta y el STATUS final lo confirma
+  [OK ] Ningun fragmento se ejecuto: el duty seguia en 25 % tras el desbordamiento
+
+== prueba_07_desbordamiento_uint32: Tiempo cerca de UINT32_MAX
+  [OK ] Sin reinicios durante la prueba
+  [OK ] Hay 3 respuestas STATUS
+  [OK ] DIAG WRAP responde con el contador a 2048 ms de UINT32_MAX
+  [OK ] La telemetria cruzo el desbordamiento (hay valores cerca de 4294967296 y otros pequenos despues)
+  [OK ] Telemetria separada exactamente 1000 ms, tambien al dar la vuelta
+  [OK ] Tras el desbordamiento sigue en AUTO con la rampa en marcha
+  [OK ] El uptime de STATUS dio la vuelta (valor pequeno)
+  [OK ] La rampa sigue el ritmo de 20 ms por punto tras dar la vuelta (max diferencia 1)
+  [OK ] Volver a MANUAL restaura el duty manual
+  [OK ] Sin respuestas ERR
+
+== prueba_08_boton: 20 pulsaciones cortas y una larga de 3 s
+  [OK ] Sin reinicios durante la prueba
+  [OK ] Hay 2 respuestas STATUS (antes y despues de los botones)
+  [OK ] Antes: contadores de B1 en cero
+  [OK ] 20 pulsaciones cortas = 20 eventos EVT short
+  [OK ] Cuenta n_short consecutiva de 1 a 20 (sin duplicados ni saltos)
+  [OK ] Todas las cortas fueron aceptadas (ninguna ignorada)
+  [OK ] MANUAL y AUTO se alternan, empezando en AUTO (AUTO entra con 10 %)
+  [OK ] Una sola pulsacion larga, aceptada, que entra en PAUSA con duty 0
+  [OK ] Al soltar tras la larga no hay ninguna corta (n_short sigue en 20)
+  [OK ] STATUS final: short=20 long=1 short_ign=0 y modo PAUSA
+  [OK ] Sin errores de ordenes ni de UART
+  [OK ] Telemetria separada exactamente 1000 ms
+  [OK ] RESUME y STREAM OFF respondieron OK
+  [OK ] Sin respuestas ERR
+
+Resumen: 124 de 124 comprobaciones correctas
+  prueba_00_humo                     OK (3/3)
+  prueba_01_duty_freq                OK (20/20)
+  prueba_02_auto_pausa               OK (17/17)
+  prueba_03_errores_y_lineas         OK (35/35)
+  prueba_04_terminadores             OK (7/7)
+  prueba_05_carga_10_por_segundo     OK (12/12)
+  prueba_06_overflow_rx              OK (6/6)
+  prueba_07_desbordamiento_uint32    OK (10/10)
+  prueba_08_boton                    OK (14/14)

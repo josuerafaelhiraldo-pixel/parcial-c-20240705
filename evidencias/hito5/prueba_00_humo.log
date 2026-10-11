@@ -1,0 +1,16 @@
+STATUS
+OK mode=MANUAL freq=1000 duty=25 manual=25 ramp=10 dir=up resume=- uptime_ms=7639 stream=OFF short=0 long=0 short_ign=0 cmd_ok=0 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+HELP
+Ordenes (en MAYUSCULAS, una por linea, hasta 63 caracteres; terminador CR, LF o CRLF):
+  HELP              esta lista
+  STATUS            modo, frecuencia, duty, uptime, contadores y errores
+  MODE MANUAL       modo MANUAL: restaura el ultimo duty manual
+  MODE AUTO         modo AUTO: rampa 10..90 % desde 10 %, subiendo
+  DUTY n            duty manual, entero 0..100 (solo en MANUAL)
+  FREQ n            frecuencia del PWM: 500, 1000 o 2000 Hz (MANUAL o AUTO)
+  PAUSE             pausa (PWM al 0 %); si ya esta en pausa responde OK
+  RESUME            reanuda el estado previo (fuera de PAUSA: ERR STATE)
+  STREAM ON | OFF   telemetria TEL cada 1000 ms (inicialmente OFF)
+Diagnostico (no es parte del protocolo): DIAG MEASURE | DIAG PWMALL | DIAG STALL n | DIAG WRAP
+B1: pulsacion corta = MANUAL <-> AUTO; larga (1,5 s) = entrar o salir de PAUSA
+OK

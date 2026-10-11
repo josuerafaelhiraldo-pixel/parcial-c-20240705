@@ -1,0 +1,47 @@
+STREAM ON
+OK STREAM ON
+STATUS
+OK mode=MANUAL freq=1000 duty=25 manual=25 ramp=10 dir=up resume=- uptime_ms=7795 stream=ON short=0 long=0 short_ign=0 cmd_ok=1 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+MODE AUTO
+OK MODE AUTO duty=10
+STATUS
+OK mode=AUTO freq=1000 duty=13 manual=25 ramp=13 dir=up resume=- uptime_ms=8203 stream=ON short=0 long=0 short_ign=0 cmd_ok=3 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+TEL up=8376 mode=AUTO freq=1000 duty=22 manual=25 short=0 long=0
+TEL up=9376 mode=AUTO freq=1000 duty=72 manual=25 short=0 long=0
+TEL up=10376 mode=AUTO freq=1000 duty=58 manual=25 short=0 long=0
+TEL up=11376 mode=AUTO freq=1000 duty=12 manual=25 short=0 long=0
+TEL up=12376 mode=AUTO freq=1000 duty=62 manual=25 short=0 long=0
+TEL up=13376 mode=AUTO freq=1000 duty=68 manual=25 short=0 long=0
+TEL up=14376 mode=AUTO freq=1000 duty=18 manual=25 short=0 long=0
+TEL up=15376 mode=AUTO freq=1000 duty=52 manual=25 short=0 long=0
+TEL up=16376 mode=AUTO freq=1000 duty=78 manual=25 short=0 long=0
+STATUS
+OK mode=AUTO freq=1000 duty=32 manual=25 ramp=32 dir=down resume=- uptime_ms=17286 stream=ON short=0 long=0 short_ign=0 cmd_ok=4 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+TEL up=17376 mode=AUTO freq=1000 duty=28 manual=25 short=0 long=0
+PAUSE
+OK PAUSE
+STATUS
+OK mode=PAUSA freq=1000 duty=0 manual=25 ramp=16 dir=down resume=AUTO uptime_ms=17846 stream=ON short=0 long=0 short_ign=0 cmd_ok=6 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+TEL up=18376 mode=PAUSA freq=1000 duty=0 manual=25 short=0 long=0
+TEL up=19376 mode=PAUSA freq=1000 duty=0 manual=25 short=0 long=0
+TEL up=20376 mode=PAUSA freq=1000 duty=0 manual=25 short=0 long=0
+STATUS
+OK mode=PAUSA freq=1000 duty=0 manual=25 ramp=16 dir=down resume=AUTO uptime_ms=20383 stream=ON short=0 long=0 short_ign=0 cmd_ok=7 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+RESUME
+OK RESUME mode=AUTO duty=16
+STATUS
+OK mode=AUTO freq=1000 duty=10 manual=25 ramp=10 dir=up resume=- uptime_ms=20829 stream=ON short=0 long=0 short_ign=0 cmd_ok=9 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+TEL up=21376 mode=AUTO freq=1000 duty=37 manual=25 short=0 long=0
+TEL up=22376 mode=AUTO freq=1000 duty=87 manual=25 short=0 long=0
+TEL up=23376 mode=AUTO freq=1000 duty=43 manual=25 short=0 long=0
+TEL up=24376 mode=AUTO freq=1000 duty=27 manual=25 short=0 long=0
+TEL up=25376 mode=AUTO freq=1000 duty=77 manual=25 short=0 long=0
+STATUS
+OK mode=AUTO freq=1000 duty=77 manual=25 ramp=77 dir=down resume=- uptime_ms=25889 stream=ON short=0 long=0 short_ign=0 cmd_ok=10 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+MODE MANUAL
+OK MODE MANUAL duty=25
+TEL up=26376 mode=MANUAL freq=1000 duty=25 manual=25 short=0 long=0
+STATUS
+OK mode=MANUAL freq=1000 duty=25 manual=25 ramp=61 dir=down resume=- uptime_ms=26538 stream=ON short=0 long=0 short_ign=0 cmd_ok=12 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+STREAM OFF
+OK STREAM OFF

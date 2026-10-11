@@ -1,0 +1,25 @@
+STREAM ON
+OK STREAM ON
+MODE AUTO
+OK MODE AUTO duty=10
+STATUS
+OK mode=AUTO freq=1000 duty=16 manual=25 ramp=16 dir=up resume=- uptime_ms=15301 stream=ON short=0 long=0 short_ign=0 cmd_ok=2 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+DIAG WRAP
+OK DIAG WRAP tick=4294965248 (UINT32_MAX en 2048 ms)
+TEL up=4294966248 mode=AUTO freq=1000 duty=82 manual=25 short=0 long=0
+TEL up=4294967248 mode=AUTO freq=1000 duty=48 manual=25 short=0 long=0
+TEL up=952 mode=AUTO freq=1000 duty=21 manual=25 short=0 long=0
+TEL up=1952 mode=AUTO freq=1000 duty=72 manual=25 short=0 long=0
+TEL up=2952 mode=AUTO freq=1000 duty=58 manual=25 short=0 long=0
+TEL up=3952 mode=AUTO freq=1000 duty=11 manual=25 short=0 long=0
+TEL up=4952 mode=AUTO freq=1000 duty=62 manual=25 short=0 long=0
+TEL up=5952 mode=AUTO freq=1000 duty=69 manual=25 short=0 long=0
+STATUS
+OK mode=AUTO freq=1000 duty=64 manual=25 ramp=64 dir=down resume=- uptime_ms=6033 stream=ON short=0 long=0 short_ign=0 cmd_ok=4 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+MODE MANUAL
+OK MODE MANUAL duty=25
+STATUS
+OK mode=MANUAL freq=1000 duty=25 manual=25 ramp=38 dir=down resume=- uptime_ms=6885 stream=ON short=0 long=0 short_ign=0 cmd_ok=6 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+TEL up=6952 mode=MANUAL freq=1000 duty=25 manual=25 short=0 long=0
+STREAM OFF
+OK STREAM OFF

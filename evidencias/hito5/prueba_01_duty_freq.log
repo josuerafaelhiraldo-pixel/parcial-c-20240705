@@ -1,0 +1,69 @@
+STREAM ON
+OK STREAM ON
+STATUS
+OK mode=MANUAL freq=1000 duty=25 manual=25 ramp=10 dir=up resume=- uptime_ms=11562 stream=ON short=0 long=0 short_ign=0 cmd_ok=1 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+DUTY 0
+OK DUTY 0
+TEL up=12129 mode=MANUAL freq=1000 duty=0 manual=0 short=0 long=0
+STATUS
+OK mode=MANUAL freq=1000 duty=0 manual=0 ramp=10 dir=up resume=- uptime_ms=12416 stream=ON short=0 long=0 short_ign=0 cmd_ok=3 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+DIAG MEASURE
+OK DIAG MEASURE (TIM3: reloj 84000000 Hz, PSC=83, ARR=999, CCR=0)
+[medida] 1000 Hz duty   0 % -> sin flancos, nivel BAJO, capturas=0   OK
+TEL up=13129 mode=MANUAL freq=1000 duty=0 manual=0 short=0 long=0
+TEL up=14129 mode=MANUAL freq=1000 duty=0 manual=0 short=0 long=0
+DUTY 50
+OK DUTY 50
+STATUS
+OK mode=MANUAL freq=1000 duty=50 manual=50 ramp=10 dir=up resume=- uptime_ms=15101 stream=ON short=0 long=0 short_ign=0 cmd_ok=6 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+TEL up=15129 mode=MANUAL freq=1000 duty=50 manual=50 short=0 long=0
+DIAG MEASURE
+OK DIAG MEASURE (TIM3: reloj 84000000 Hz, PSC=83, ARR=999, CCR=500)
+[medida] 1000 Hz duty  50 % -> f=1000.0 Hz (+0.00 %) duty=50.00 % (+0.00 pp) n=198   OK
+TEL up=16129 mode=MANUAL freq=1000 duty=50 manual=50 short=0 long=0
+TEL up=17129 mode=MANUAL freq=1000 duty=50 manual=50 short=0 long=0
+DUTY 100
+OK DUTY 100
+STATUS
+OK mode=MANUAL freq=1000 duty=100 manual=100 ramp=10 dir=up resume=- uptime_ms=17799 stream=ON short=0 long=0 short_ign=0 cmd_ok=9 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+TEL up=18129 mode=MANUAL freq=1000 duty=100 manual=100 short=0 long=0
+DIAG MEASURE
+OK DIAG MEASURE (TIM3: reloj 84000000 Hz, PSC=83, ARR=999, CCR=1000)
+[medida] 1000 Hz duty 100 % -> sin flancos, nivel ALTO, capturas=0   OK
+TEL up=19129 mode=MANUAL freq=1000 duty=100 manual=100 short=0 long=0
+DUTY 50
+OK DUTY 50
+TEL up=20129 mode=MANUAL freq=1000 duty=50 manual=50 short=0 long=0
+FREQ 500
+OK FREQ 500
+STATUS
+OK mode=MANUAL freq=500 duty=50 manual=50 ramp=10 dir=up resume=- uptime_ms=20904 stream=ON short=0 long=0 short_ign=0 cmd_ok=13 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+TEL up=21129 mode=MANUAL freq=500 duty=50 manual=50 short=0 long=0
+DIAG MEASURE
+OK DIAG MEASURE (TIM3: reloj 84000000 Hz, PSC=83, ARR=1999, CCR=1000)
+[medida]  500 Hz duty  50 % -> f=500.0 Hz (+0.00 %) duty=50.00 % (+0.00 pp) n=98   OK
+TEL up=22129 mode=MANUAL freq=500 duty=50 manual=50 short=0 long=0
+TEL up=23129 mode=MANUAL freq=500 duty=50 manual=50 short=0 long=0
+FREQ 1000
+OK FREQ 1000
+STATUS
+OK mode=MANUAL freq=1000 duty=50 manual=50 ramp=10 dir=up resume=- uptime_ms=23572 stream=ON short=0 long=0 short_ign=0 cmd_ok=16 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+DIAG MEASURE
+OK DIAG MEASURE (TIM3: reloj 84000000 Hz, PSC=83, ARR=999, CCR=500)
+TEL up=24129 mode=MANUAL freq=1000 duty=50 manual=50 short=0 long=0
+[medida] 1000 Hz duty  50 % -> f=1000.0 Hz (+0.00 %) duty=50.00 % (+0.00 pp) n=197   OK
+TEL up=25129 mode=MANUAL freq=1000 duty=50 manual=50 short=0 long=0
+FREQ 2000
+OK FREQ 2000
+TEL up=26129 mode=MANUAL freq=2000 duty=50 manual=50 short=0 long=0
+STATUS
+OK mode=MANUAL freq=2000 duty=50 manual=50 ramp=10 dir=up resume=- uptime_ms=26245 stream=ON short=0 long=0 short_ign=0 cmd_ok=19 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+DIAG MEASURE
+OK DIAG MEASURE (TIM3: reloj 84000000 Hz, PSC=83, ARR=499, CCR=250)
+[medida] 2000 Hz duty  50 % -> f=2000.0 Hz (+0.00 %) duty=50.00 % (+0.00 pp) n=398   OK
+TEL up=27129 mode=MANUAL freq=2000 duty=50 manual=50 short=0 long=0
+TEL up=28129 mode=MANUAL freq=2000 duty=50 manual=50 short=0 long=0
+STATUS
+OK mode=MANUAL freq=2000 duty=50 manual=50 ramp=10 dir=up resume=- uptime_ms=28508 stream=ON short=0 long=0 short_ign=0 cmd_ok=21 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+STREAM OFF
+OK STREAM OFF

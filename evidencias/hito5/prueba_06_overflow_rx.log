@@ -1,0 +1,12 @@
+STATUS
+OK mode=MANUAL freq=1000 duty=25 manual=25 ramp=10 dir=up resume=- uptime_ms=10294 stream=OFF short=0 long=0 short_ign=0 cmd_ok=0 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+DIAG STALL 3000
+OK DIAG STALL 3000
+
+ERR OVERFLOW
+STATUS
+OK mode=MANUAL freq=1000 duty=25 manual=25 ramp=10 dir=up resume=- uptime_ms=16142 stream=OFF short=0 long=0 short_ign=0 cmd_ok=2 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=1 rx_lost=233 uart_err=0 tx_drop=0
+DUTY 44
+OK DUTY 44
+STATUS
+OK mode=MANUAL freq=1000 duty=44 manual=44 ramp=10 dir=up resume=- uptime_ms=17195 stream=OFF short=0 long=0 short_ign=0 cmd_ok=4 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=1 rx_lost=233 uart_err=0 tx_drop=0

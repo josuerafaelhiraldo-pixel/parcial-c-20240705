@@ -1,0 +1,40 @@
+STATUS
+OK mode=MANUAL freq=1000 duty=25 manual=25 ramp=10 dir=up resume=- uptime_ms=24139 stream=OFF short=0 long=0 short_ign=0 cmd_ok=0 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
+DUTY 30
+OK DUTY 30
+DUTY 31
+OK DUTY 31
+DUTY 32
+OK DUTY 32
+DUTY 33
+OK DUTY 33
+DUTY 34
+OK DUTY 34
+DUTY 35
+OK DUTY 35
+DUTY 36
+OK DUTY 36
+DUTY 37
+OK DUTY 37
+DUTY 38
+OK DUTY 38
+DUTY 50
+OK DUTY 50
+DUTY 51
+OK DUTY 51
+DUTY 52
+OK DUTY 52
+DUTY 60
+OK DUTY 60
+DUTY 61
+OK DUTY 61
+DUTY 62
+OK DUTY 62
+DUTY 70
+OK DUTY 70
+DUTY 71
+OK DUTY 71
+DUTY 72
+OK DUTY 72
+STATUS
+OK mode=MANUAL freq=1000 duty=72 manual=72 ramp=10 dir=up resume=- uptime_ms=29554 stream=OFF short=0 long=0 short_ign=0 cmd_ok=19 err_cmd=0 err_arg=0 err_range=0 err_state=0 err_ovf=0 rx_lost=0 uart_err=0 tx_drop=0
