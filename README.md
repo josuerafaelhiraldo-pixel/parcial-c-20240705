@@ -96,9 +96,9 @@ stateDiagram-v2
 | Carpeta | Contenido |
 |---|---|
 | `Parcial_20240705/` | Proyecto de STM32CubeIDE (`Src/`, `Inc/`, `Drivers/`, `.ioc`) |
-| `analisis/` | Documentos de diseño (`uart_buffers.md`: buffers UART; `tick_y_antirrebote.md`: tick, EXTI y antirrebote; `pwm_y_medicion.md`: PWM, medición interna y limitaciones) |
-| `pruebas/` | Resultados de pruebas (`hito1_resultados.md`, `hito2_resultados.md`, `hito3_resultados.md`) y pruebas de lógica en PC (`host/`) |
-| `evidencias/` | Capturas, fotos, mediciones y enlace al video (`hito1/`, `hito2/`, `hito3/`) |
+| `analisis/` | Documentos de diseño (`uart_buffers.md`: buffers UART; `tick_y_antirrebote.md`: tick, EXTI y antirrebote; `pwm_y_medicion.md`: PWM, medición interna y limitaciones; `estados_y_comandos.md`: máquina de estados, intérprete de órdenes y telemetría) |
+| `pruebas/` | Resultados de pruebas (`hito1_resultados.md`, `hito2_resultados.md`, `hito3_resultados.md`, `hito4_resultados.md`) y pruebas de lógica en PC (`host/`) |
+| `evidencias/` | Capturas, fotos, mediciones y enlace al video (`hito1/`, `hito2/`, `hito3/`, `hito4/`) |
 
 ## Código del SDK y aporte propio
 
@@ -112,8 +112,12 @@ stateDiagram-v2
   - `pwm.c/.h`: PWM de hardware con TIM3 (frecuencia, duty, 0 % y 100 % exactos, escritura segura de ARR y CCR).
   - `pwm_meter.c/.h`: medidor interno con TIM2 en modo entrada PWM (periodo y tiempo en alto por hardware).
   - `pwm_check.c/.h`: verificación del PWM sin esperas (medida única y autoprueba de 15 combinaciones).
-  - `app_config.h`: pines, polaridades, tiempos del pulsador, PWM, medidor y tamaños de buffer.
-  - `app.c/.h`: arranque y pruebas temporales de los Hitos 1 a 3 (se reemplazan en los hitos siguientes).
+  - `ctrl.c/.h`: máquina de estados MANUAL / AUTO / PAUSA, rampa de AUTO y patrones del LED.
+  - `line.c/.h`: armado de líneas de orden (CR, LF y CRLF, 63 caracteres, descarte hasta el terminador).
+  - `cmd.c/.h`: análisis de órdenes y validación numérica estricta.
+  - `shell.c/.h`: ejecución de órdenes, respuestas, telemetría `TEL`, eventos `EVT` y órdenes de diagnóstico `DIAG`.
+  - `app_config.h`: pines, polaridades, tiempos, PWM, rampa, telemetría y tamaños de buffer.
+  - `app.c/.h`: arranque y ciclo principal que conecta los módulos (no hay lógica de control en `main.c`).
 - TIM2 se añadió en CubeMX (`.ioc`, `tim.c`, `tim.h`, `main.c`) para documentar el pin PA0 y el temporizador; el medidor reescribe sus registros de forma explícita.
 - Cambios propios en archivos generados: solo tres líneas en los bloques `USER CODE` de `main.c`
   (`#include "app.h"`, `App_Init();` y `App_Loop();`).
@@ -123,15 +127,15 @@ stateDiagram-v2
 
 | Prueba | Resultado esperado | Estado |
 |---|---|---|
-| Encendido | MANUAL, 1000 Hz, 25 %, STREAM OFF | Parcial: PWM en 1000 Hz y 25 % al arrancar (Hito 3); faltan MANUAL y STREAM |
-| DUTY 0 / 50 / 100 | Nivel bajo / 50 % / nivel alto | Parcial: 0 % y 100 % constantes sin pulsos y 50 % medido en las tres frecuencias (Hito 3); falta por comando |
-| FREQ 500 / 1000 / 2000 | Error de frecuencia ≤ 2 %; el tick sigue en 1 ms | Parcial: error medido +0,00 % y tick sin cambios (Hito 3); falta por comando |
-| AUTO durante 3,2 s | Vuelve a 10 % tras subir a 90 % y bajar | Pendiente |
+| Encendido | MANUAL, 1000 Hz, 25 %, STREAM OFF | Hecho en la placa (Hito 4): banner, `Modo MANUAL, STREAM OFF.` y `STATUS` (`evidencias/hito4/01_boot_help_status.png`) |
+| DUTY 0 / 50 / 100 | Nivel bajo / 50 % / nivel alto | Parcial: 0 % y 100 % constantes sin pulsos y 50 % medido en las tres frecuencias (Hito 3); `DUTY 40` y `DUTY 60` por comando funcionan (Hito 4); falta repetir 0, 50 y 100 por comando |
+| FREQ 500 / 1000 / 2000 | Error de frecuencia ≤ 2 %; el tick sigue en 1 ms | Parcial: error medido +0,00 % y tick sin cambios (Hito 3); `FREQ 500` y `FREQ 2000` por comando, medido +0,00 % a 500 Hz (Hito 4); falta repetir las tres |
+| AUTO durante 3,2 s | Vuelve a 10 % tras subir a 90 % y bajar | Parcial: rampa verificada milisegundo a milisegundo en las pruebas de PC y observada en la placa con `TEL` y los LED (Hito 4); falta la medición en la placa (Hito 5) |
 | 20 pulsaciones cortas | 20 eventos, sin duplicados | Pendiente |
-| Mantener el botón 3 s | Una larga; al soltar no genera corta | Pendiente |
-| PAUSA desde AUTO y RESUME | Duty 0 en pausa; continúa desde el valor y la dirección guardados | Pendiente |
-| DUTY 20abc / -1 / 101 | ERR, sin modificar el duty | Pendiente |
-| Línea de 100 caracteres y luego STATUS | ERR OVERFLOW; STATUS posterior funciona | Pendiente |
+| Mantener el botón 3 s | Una larga; al soltar no genera corta | Parcial: Hito 2 (10,7 s, una larga) y Hito 4 (largas de unos 2 s con la aplicación integrada: un solo `EVT long`); falta repetir con 3 s |
+| PAUSA desde AUTO y RESUME | Duty 0 en pausa; continúa desde el valor y la dirección guardados | Hecho en la placa (Hito 4): `duty=0` en PAUSA y `RESUME` continúa desde el valor guardado (`evidencias/hito4/03_boton_eventos.png`) |
+| DUTY 20abc / -1 / 101 | ERR, sin modificar el duty | Hecho en la placa (Hito 4): `ERR ARG`, `ERR RANGE`, `ERR RANGE`; el duty no cambió (`evidencias/hito4/02_comandos_errores.png`) |
+| Línea de 100 caracteres y luego STATUS | ERR OVERFLOW; STATUS posterior funciona | Parcial: líneas largas dieron `ERR OVERFLOW` y el `STATUS` siguiente funcionó (Hito 4); falta repetir con 100 caracteres exactos |
 | CR, LF y CRLF | Una ejecución por orden | Pendiente |
 | STREAM ON con 10 órdenes/s por 30 s | Sin reinicios ni pérdidas | Pendiente |
 | Desbordamiento de RX provocado | Error contabilizado y recuperación en la siguiente línea | Pendiente |
@@ -143,7 +147,9 @@ Las pruebas de aceptación de «20 pulsaciones cortas», «Mantener el botón 3 
 se hicieron en el Hito 2 con la aplicación de prueba y se repetirán con la aplicación integrada (Hito 5).
 
 Resultados del PWM y su medición (Hito 3): `pruebas/hito3_resultados.md`.
-Las pruebas «Encendido», «DUTY 0 / 50 / 100» y «FREQ 500 / 1000 / 2000» se verificaron en el Hito 3 a nivel de PWM, con teclas temporales; se repetirán con las órdenes de la consola en el Hito 5.
+Las pruebas «Encendido», «DUTY 0 / 50 / 100» y «FREQ 500 / 1000 / 2000» se verificaron en el Hito 3 a nivel de PWM, con teclas temporales; en el Hito 4 se usaron órdenes de la consola y se repetirán completas en el Hito 5.
+
+Resultados de la aplicación integrada, la consola y el botón (Hito 4): `pruebas/hito4_resultados.md`.
 
 ### Verificación de frecuencia y duty del PWM
 
@@ -161,7 +167,7 @@ No se dispone de osciloscopio ni de analizador lógico. El docente indicó que e
 | 1. GPIO y consola | Hecho (2026-10-09) | `Agrego buffer circular y consola UART2 no bloqueante`; `Hito 1: pruebo LD2, lectura de B1 y consola por USART2`; `Hito 1: agrego evidencias, analisis de buffers y resultados`. Evidencias en `evidencias/hito1/` |
 | 2. Interrupciones y antirrebote | Hecho (2026-10-10) | `Agrego tick de 1 ms con interrupcion de TIM6`; `Agrego boton B1 con EXTI en ambos flancos y antirrebote de 30 ms`; `Hito 2: integro tick y boton en la app, con pruebas en PC y analisis`; commit de evidencias del Hito 2. Evidencias en `evidencias/hito2/` |
 | 3. TIMER y PWM | Hecho (2026-10-10) | `Configuro TIM2 en CubeMX para medir el PWM`; `Agrego modulo PWM con TIM3: frecuencia, duty y niveles 0 y 100 %`; `Agrego medidor interno del PWM con TIM2 en modo captura`; `Hito 3: autoprueba del PWM y teclas de control`; `Hito 3: agrego evidencias, resultados y actualizo el README`. Evidencias en `evidencias/hito3/` |
-| 4. Integración y comandos | Pendiente | — |
+| 4. Integración y comandos | Hecho (2026-10-10) | `Hito 4: lectura de linea y analisis de ordenes (line, cmd) con pruebas`; `Hito 4: maquina de estados MANUAL/AUTO/PAUSA y rampa (ctrl)`; `Hito 4: interprete de ordenes, telemetria e integracion (shell, app, consola)`; `Hito 4: evidencias, resultados y README`. Evidencias en `evidencias/hito4/` |
 | 5. Pruebas y correcciones | Pendiente | — |
 
 ### Hito 1: GPIO y consola
@@ -214,14 +220,35 @@ Más evidencia en `evidencias/hito2/` y detalle en `pruebas/hito2_resultados.md`
 
 Más evidencia en `evidencias/hito3/` y detalle en `pruebas/hito3_resultados.md` y `analisis/pwm_y_medicion.md`.
 
+### Hito 4: integración y comandos
+
+- Compilación y carga correctas en STM32CubeIDE 2.2.0. La aplicación de pruebas de los Hitos 1 a 3 (teclas sueltas) se reemplazó por la aplicación real.
+- Máquina de estados MANUAL / AUTO / PAUSA. AUTO sube de 10 % a 90 % y baja, 1 punto cada 20 ms (1,6 s por tramo, ciclo de 3,2 s), empezando en 10 % subiendo. LD2: fijo en MANUAL, 500 ms en AUTO, 125 ms en PAUSA. PAUSA pone el PWM en 0 % y conserva el modo previo, el duty manual, la frecuencia, el valor y la dirección de la rampa; `RESUME` y la pulsación larga continúan desde ahí sin recuperar los pasos del tiempo en pausa.
+- B1: corta = MANUAL ↔ AUTO; larga (1,5 s, una sola vez, sin corta al soltar) = entrar o salir de PAUSA; la corta en PAUSA se ignora. Los contadores de cortas, largas e ignoradas se ven en `STATUS`.
+- Consola: órdenes en mayúsculas, una por línea, de hasta 63 caracteres, terminadas en CR, LF o CRLF (CRLF cuenta como una sola). Los números se validan completos (`20abc`, `-1`, `101` y números enormes se rechazan sin cambiar nada). Una línea demasiado larga se descarta hasta su terminador y responde `ERR OVERFLOW`; la siguiente orden funciona.
+- Sin bloqueos ni esperas: el parser, las respuestas y la telemetría corren en `main`; las interrupciones (EXTI13, TIM6, USART2) solo anotan datos. Las respuestas esperan a que quepan enteras en la cola de transmisión (1024 bytes) en lugar de cortarse. Todas las comparaciones de tiempo usan `(uint32_t)(ahora - antes)`.
+- `STREAM ON` emite una línea `TEL` cada 1000 ms (separadas exactamente 1000 ms en la placa) y una línea `EVT B1 ...` por cada pulsación.
+- Órdenes `DIAG` (no forman parte del protocolo; se pueden desactivar con `APP_DIAG_ENABLED`): `DIAG MEASURE` (medición interna con el puente PA6-PA0), `DIAG PWMALL`, `DIAG STALL n` y `DIAG WRAP`, para provocar el desbordamiento de RX y el cruce de UINT32_MAX en las pruebas.
+- Medición con `DUTY 40` y `FREQ 500`: f = 500,0 Hz (+0,00 %), duty = 39,99 % (-0,01 puntos), n = 98.
+- 110 errores inyectados a propósito en el código fueron detectados por las pruebas de PC.
+- Observación: pegando un bloque de órdenes justo tras un reset, la primera línea respondió `ERR COMMAND` dos veces; escrita a mano o con una línea en blanco antes funciona. Se atribuye a un byte invisible del texto copiado, no confirmado (detalle en `pruebas/hito4_resultados.md`).
+- Limitaciones: si se pierde o daña un byte de RX se vacía el buffer y puede perderse una orden válida que esperaba (nunca se ejecuta un fragmento). Las pruebas de aceptación con registros completos de CR/LF/CRLF, 100 caracteres, 10 órdenes por segundo, desbordamiento de RX y UINT32_MAX quedan para el Hito 5.
+
+![Pulsaciones de B1, PAUSA y RESUME con STREAM ON](evidencias/hito4/03_boton_eventos.png)
+
+![Órdenes y errores](evidencias/hito4/02_comandos_errores.png)
+
+Más evidencia en `evidencias/hito4/` y detalle en `pruebas/hito4_resultados.md` y `analisis/estados_y_comandos.md`.
+
 ## Estado actual
 
 - Hecho: proyecto base generado con CubeMX (TIM3 PWM, TIM6 tick, TIM2 medidor, USART2, EXTI13 y LD2),
-  Hito 1 (GPIO y consola), Hito 2 (tick de 1 ms, EXTI de B1 y antirrebote) y Hito 3 (PWM de hardware y
-  medición interna) probados en la placa.
-- Pendiente: máquina de estados, rampa de AUTO, parser de órdenes, telemetría, pruebas de aceptación
-  completas y el video.
-- Limitaciones conocidas: las teclas de prueba (`1`, `0`, `t`, `b`, `s`, `h`, `m`, `w`, `f`, `d`, `p`, `a`)
-  y las acciones de B1 (corta = alternar LD2, larga = apagar LD2) son temporales; se reemplazan en el Hito 4.
-  La medición del PWM es interna y comparte reloj con el PWM (ver arriba).
-- Errores conocidos: ninguno registrado en los Hitos 1 a 3.
+  Hito 1 (GPIO y consola), Hito 2 (tick de 1 ms, EXTI de B1 y antirrebote), Hito 3 (PWM de hardware y
+  medición interna) y Hito 4 (máquina de estados, rampa de AUTO, intérprete de órdenes, telemetría e
+  integración) probados en la placa.
+- Pendiente: pruebas de aceptación con registros completos (Hito 5), video y ajustes finales.
+- Limitaciones conocidas: la medición del PWM es interna y comparte reloj con el PWM (ver arriba); las órdenes
+  `DIAG` no forman parte del protocolo del enunciado; si se pierde un byte de RX puede perderse una orden válida
+  que esperaba en el buffer (detalle en `analisis/estados_y_comandos.md`).
+- Errores conocidos: ninguno confirmado. Observado: el primer comando pegado tras un reset respondió `ERR COMMAND`
+  en dos ocasiones, atribuido a un byte invisible del texto copiado (ver `pruebas/hito4_resultados.md`).
