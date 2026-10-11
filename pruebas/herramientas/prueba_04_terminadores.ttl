@@ -1,0 +1,39 @@
+; Terminadores CR, LF y CRLF (una ejecucion por orden)
+; Antes de ejecutar: pulse RESET y espere el banner
+; Tera Term debe estar conectado a COM8 (115200 8N1). Control > Macro...
+logfile = 'C:\Users\Yoka\git\parcial-c-20240705\evidencias\hito5\'
+strconcat logfile 'prueba_04_terminadores.log'
+logopen logfile 0 0 1
+mpause 500
+sendln 'STATUS'
+mpause 400
+send 'DUTY 30' #13
+mpause 250
+send 'DUTY 31' #10
+mpause 250
+send 'DUTY 32' #13 #10
+mpause 250
+send 'DUTY 33' #13
+mpause 250
+send 'DUTY 34' #10
+mpause 250
+send 'DUTY 35' #13 #10
+mpause 250
+send 'DUTY 36' #13
+mpause 250
+send 'DUTY 37' #10
+mpause 250
+send 'DUTY 38' #13 #10
+mpause 250
+send 'DUTY 50' #13 #10 'DUTY 51' #13 #10 'DUTY 52' #13 #10
+mpause 800
+send 'DUTY 60' #10 'DUTY 61' #10 'DUTY 62' #10
+mpause 800
+send 'DUTY 70' #13 'DUTY 71' #13 'DUTY 72' #13
+mpause 800
+sendln 'STATUS'
+mpause 400
+mpause 1500
+logclose
+messagebox 'Prueba terminada. El registro quedo guardado.' 'Hito 5'
+end

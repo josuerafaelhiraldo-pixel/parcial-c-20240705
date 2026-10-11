@@ -1,0 +1,15 @@
+; Prueba de humo: comprueba que el macro y el registro funcionan
+; Antes de ejecutar: pulse RESET y espere el banner
+; Tera Term debe estar conectado a COM8 (115200 8N1). Control > Macro...
+logfile = 'C:\Users\Yoka\git\parcial-c-20240705\evidencias\hito5\'
+strconcat logfile 'prueba_00_humo.log'
+logopen logfile 0 0 1
+mpause 500
+sendln 'STATUS'
+mpause 500
+sendln 'HELP'
+mpause 500
+mpause 1500
+logclose
+messagebox 'Prueba terminada. El registro quedo guardado.' 'Hito 5'
+end

@@ -1,0 +1,57 @@
+; DUTY 0/50/100 y FREQ 500/1000/2000 con medicion interna (requiere el puente PA6-PA0)
+; Antes de ejecutar: pulse RESET y espere el banner; puente PA6-PA0 puesto
+; Tera Term debe estar conectado a COM8 (115200 8N1). Control > Macro...
+logfile = 'C:\Users\Yoka\git\parcial-c-20240705\evidencias\hito5\'
+strconcat logfile 'prueba_01_duty_freq.log'
+logopen logfile 0 0 1
+mpause 500
+sendln 'STREAM ON'
+mpause 400
+sendln 'STATUS'
+mpause 400
+sendln 'DUTY 0'
+mpause 400
+sendln 'STATUS'
+mpause 400
+sendln 'DIAG MEASURE'
+mpause 1800
+sendln 'DUTY 50'
+mpause 400
+sendln 'STATUS'
+mpause 400
+sendln 'DIAG MEASURE'
+mpause 1800
+sendln 'DUTY 100'
+mpause 400
+sendln 'STATUS'
+mpause 400
+sendln 'DIAG MEASURE'
+mpause 1800
+sendln 'DUTY 50'
+mpause 400
+sendln 'FREQ 500'
+mpause 400
+sendln 'STATUS'
+mpause 400
+sendln 'DIAG MEASURE'
+mpause 1800
+sendln 'FREQ 1000'
+mpause 400
+sendln 'STATUS'
+mpause 400
+sendln 'DIAG MEASURE'
+mpause 1800
+sendln 'FREQ 2000'
+mpause 400
+sendln 'STATUS'
+mpause 400
+sendln 'DIAG MEASURE'
+mpause 1800
+sendln 'STATUS'
+mpause 400
+sendln 'STREAM OFF'
+mpause 400
+mpause 1500
+logclose
+messagebox 'Prueba terminada. El registro quedo guardado.' 'Hito 5'
+end

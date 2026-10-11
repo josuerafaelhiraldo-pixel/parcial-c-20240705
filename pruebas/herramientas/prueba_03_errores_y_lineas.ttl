@@ -1,0 +1,69 @@
+; Errores de ordenes, espacios, limites de linea (63, 64 y 100 caracteres)
+; Antes de ejecutar: pulse RESET y espere el banner
+; Tera Term debe estar conectado a COM8 (115200 8N1). Control > Macro...
+logfile = 'C:\Users\Yoka\git\parcial-c-20240705\evidencias\hito5\'
+strconcat logfile 'prueba_03_errores_y_lineas.log'
+logopen logfile 0 0 1
+mpause 500
+sendln 'STATUS'
+mpause 300
+sendln 'DUTY 40'
+mpause 300
+sendln 'STATUS'
+mpause 300
+sendln 'DUTY 20abc'
+mpause 300
+sendln 'DUTY -1'
+mpause 300
+sendln 'DUTY 101'
+mpause 300
+sendln 'DUTY'
+mpause 300
+sendln 'DUTY 5 6'
+mpause 300
+sendln 'DUTY 99999999999999999999'
+mpause 300
+sendln 'DUTY 4294967396'
+mpause 300
+sendln 'FREQ 750'
+mpause 300
+sendln 'FREQ'
+mpause 300
+sendln 'MODE'
+mpause 300
+sendln 'MODE FOO'
+mpause 300
+sendln 'MODE AUTO X'
+mpause 300
+sendln 'duty 10'
+mpause 300
+sendln 'FOO'
+mpause 300
+sendln 'STREAM'
+mpause 300
+sendln 'STREAM MAYBE'
+mpause 300
+sendln 'HELP me'
+mpause 300
+sendln 'RESUME'
+mpause 300
+sendln 'STATUS'
+mpause 300
+send '   DUTY 45   ' #13
+mpause 300
+sendln 'STATUS'
+mpause 300
+send 'STATUS                                                         ' #13
+mpause 400
+send 'STATUS                                                          ' #13
+mpause 400
+sendln 'STATUS'
+mpause 400
+send 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' #13
+mpause 400
+sendln 'STATUS'
+mpause 400
+mpause 1500
+logclose
+messagebox 'Prueba terminada. El registro quedo guardado.' 'Hito 5'
+end

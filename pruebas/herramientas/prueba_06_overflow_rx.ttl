@@ -1,0 +1,34 @@
+; Desbordamiento de RX provocado con DIAG STALL
+; Antes de ejecutar: pulse RESET y espere el banner
+; Tera Term debe estar conectado a COM8 (115200 8N1). Control > Macro...
+logfile = 'C:\Users\Yoka\git\parcial-c-20240705\evidencias\hito5\'
+strconcat logfile 'prueba_06_overflow_rx.log'
+logopen logfile 0 0 1
+mpause 500
+sendln 'STATUS'
+mpause 400
+sendln 'DIAG STALL 3000'
+mpause 300
+send 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' #13
+send 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' #13
+send 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' #13
+send 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' #13
+send 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' #13
+send 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' #13
+send 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' #13
+send 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' #13
+; la placa deja de leer 3 s: los 488 bytes desbordan el buffer de 255
+mpause 4500
+; un fin de linea cierra la linea descartada (responde ERR OVERFLOW)
+send #13
+mpause 500
+sendln 'STATUS'
+mpause 500
+sendln 'DUTY 44'
+mpause 500
+sendln 'STATUS'
+mpause 500
+mpause 1500
+logclose
+messagebox 'Prueba terminada. El registro quedo guardado.' 'Hito 5'
+end

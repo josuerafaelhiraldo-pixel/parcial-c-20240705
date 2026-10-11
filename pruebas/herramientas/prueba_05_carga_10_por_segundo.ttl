@@ -1,0 +1,41 @@
+; STREAM ON con 300 ordenes a ~10 por segundo (unos 30 s), con la rampa de AUTO y el boton B1 activos
+; Antes de ejecutar: pulse RESET y espere el banner
+; Durante la prueba: pulse B1 (pulsacion corta, sin mantener) unas 6 veces, espaciadas
+; Tera Term debe estar conectado a COM8 (115200 8N1). Control > Macro...
+logfile = 'C:\Users\Yoka\git\parcial-c-20240705\evidencias\hito5\'
+strconcat logfile 'prueba_05_carga_10_por_segundo.log'
+logopen logfile 0 0 1
+mpause 500
+messagebox 'Al pulsar Aceptar empiezan 300 ordenes (unos 35 s). Durante ese tiempo pulse B1 (corta) unas 6 veces, sin mantenerlo.' 'Hito 5'
+sendln 'STREAM ON'
+mpause 500
+sendln 'MODE AUTO'
+mpause 300
+sendln 'STATUS'
+mpause 300
+; 100 ordenes STATUS, una cada 100 ms
+for i 1 100
+  sendln 'STATUS'
+  mpause 100
+next
+; 100 ordenes FREQ 500
+for i 1 100
+  sendln 'FREQ 500'
+  mpause 100
+next
+; 100 ordenes FREQ 2000
+for i 1 100
+  sendln 'FREQ 2000'
+  mpause 100
+next
+mpause 1500
+sendln 'STATUS'
+mpause 400
+sendln 'STREAM OFF'
+mpause 400
+sendln 'STATUS'
+mpause 400
+mpause 1500
+logclose
+messagebox 'Prueba terminada. El registro quedo guardado.' 'Hito 5'
+end
